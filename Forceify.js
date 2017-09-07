@@ -396,6 +396,7 @@
             this.on(_eventLeave, leaveListener);
             return this;
         };
+        Forceify.__esModule = true;
         return Forceify;
     }());
     var registerEvent = function (elem) {
@@ -417,4 +418,3 @@
     Forceify.RegisterNode = registerEvent;
     return Forceify;
 }));
-//# sourceMappingURL=Forceify.js.map

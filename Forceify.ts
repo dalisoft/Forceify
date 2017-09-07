@@ -208,6 +208,7 @@ declare let exports: any
             private _resetOnLeave: boolean
             private _isIOS9RealTouchDevices: boolean
             public static RegisterNode: any
+			public static __esModule: boolean = true
             constructor(el) {
                 let forceifyID = 0
                 if (!el.forceifyQueueId) {
