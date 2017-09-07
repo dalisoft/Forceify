@@ -1,0 +1,33 @@
+{
+  "name": "forceify",
+  "version": "0.0.1-development",
+  "description": "Fast, optimized and lightweight cross-device 3D-Touch handling javascript/typescript library",
+  "main": "js/Forceify.js",
+  "types": "js/Forceify.d.ts",
+  "cdn": "js/Forceify.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "3d",
+    "touch",
+    "force",
+    "force-touch",
+    "3d-touch",
+    "ios",
+    "js",
+    "android",
+    "unsupported",
+    "simulate",
+	"normalize",
+	"cross-device",
+	"javascript",
+	"typescript",
+	"lightweight",
+	"fast",
+    "osx",
+    "iphone"
+  ],
+  "author": "dalisoft",
+  "license": "MIT"
+}
