@@ -68,11 +68,11 @@
 		var scale = 1 + (force * 1.5);
 		var transform = is3D ? 'translate3d(-50%, -50%, 0) scale3d(' + scale + ', ' + scale + ', ' + scale + ')' : 'translate(-50%, -50%) scale(' + scale + ')';
 
-		setTransform(this, transform);
+		setTransform(forceMe, transform);
 
 		var color = 'rgb(' + ((255 * force) | 0) + ', ' + 204 + ', ' + (255 - (255 * force) | 0) + ')';
 
-		this.style.backgroundColor = color;
+		forceMe.style.backgroundColor = color;
 
 		forceValue.innerHTML = 'Force: ' + ((force * 10000) | 0) / 10000 + ', Deep Press:&nbsp;<span style="color:' + color + ';font-weight:' + steppize(force, [100, 200, 300, 400, 500, 600, 700, 800, 900]) + '">' + (isDeepPress(force) ? 'Yes' : 'No') + '</span>';
 	});
