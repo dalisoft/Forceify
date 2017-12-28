@@ -51,7 +51,6 @@ declare let exports: any
         class Logic {
             public currentValue: forceType
             private _queueID: number
-			private __forceValue: number
             private _onUpdate: any
             private _delayTime: number
             private _duration: number
@@ -206,6 +205,7 @@ declare let exports: any
             private _useSameDurInLeave: boolean
             private _resetOnLeave: boolean
             private _isIOS9RealTouchDevices: boolean
+			private __forceValue: number
             public static RegisterNode: any
 			public static __esModule: boolean = true
             constructor(el) {
@@ -322,20 +322,20 @@ declare let exports: any
 				return this
 			}
             init() {
-				const { el, _simulatedCallback, _callback } = this.el
+				const { el, _simulatedCallback, _callback } = this
                 this.preventTouchCallout()
                 if ('onwebkitmouseforcebegin' in el) {
 					_simulatedCallback.onUpdate(_callback)
                     this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
                     this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
-                    this.on('mouseend', e => this.handleForceEnd(e))
+                    this.on('mouseup', e => this.handleForceEnd(e))
                     this._checkResult = 'macOSForce'
                     return this
                 } else if ('onmouseforcebegin' in el) {
 					_simulatedCallback.onUpdate(_callback)
                     this.on('mouseforcebegin', e => this.handleForceChange(e))
                     this.on('mouseforcechanged', e => this.handleForceChange(e))
-                    this.on('mouseend', e => this.handleForceEnd(e))
+                    this.on('mouseup', e => this.handleForceEnd(e))
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
@@ -423,6 +423,7 @@ declare let exports: any
                     target: el
                 }
                 _simulatedCallback.onUpdate(() => {
+					console.log(_forceValue)
                     _callback.call(this, _forceValue)
                 })
                 this.on(eventType, e => {
@@ -459,8 +460,8 @@ declare let exports: any
                     el
                 } = this
 
-                if (!_simulatedCallback) {
-                    _simulatedCallback = this._simulatedCallback = new Logic(id, el).onUpdate(_callback)
+                if (_simulatedCallback) {
+                    _simulatedCallback.onUpdate(_callback)
                 }
 
                 // LONG PRESS

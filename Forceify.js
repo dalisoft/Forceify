@@ -253,13 +253,13 @@
         };
         Forceify.prototype.init = function () {
             var _this = this;
-            var _a = this.el, el = _a.el, _simulatedCallback = _a._simulatedCallback, _callback = _a._callback;
+            var _a = this, el = _a.el, _simulatedCallback = _a._simulatedCallback, _callback = _a._callback;
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
                 _simulatedCallback.onUpdate(_callback);
                 this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on('mouseend', function (e) { return _this.handleForceEnd(e); });
+                this.on('mouseup', function (e) { return _this.handleForceEnd(e); });
                 this._checkResult = 'macOSForce';
                 return this;
             }
@@ -267,7 +267,7 @@
                 _simulatedCallback.onUpdate(_callback);
                 this.on('mouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('mouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on('mouseend', function (e) { return _this.handleForceEnd(e); });
+                this.on('mouseup', function (e) { return _this.handleForceEnd(e); });
                 this._checkResult = 'macOSForce';
                 return this;
             }
@@ -346,6 +346,7 @@
                 target: el
             };
             _simulatedCallback.onUpdate(function () {
+                console.log(_forceValue);
                 _callback.call(_this, _forceValue);
             });
             this.on(eventType, function (e) {
@@ -367,8 +368,8 @@
         Forceify.prototype.handleSimulate = function () {
             var _this = this;
             var _a = this, _simulatedCallback = _a._simulatedCallback, _isIOS9RealTouchDevices = _a._isIOS9RealTouchDevices, _eventPress = _a._eventPress, _eventUp = _a._eventUp, _eventLeave = _a._eventLeave, isPressed = _a.isPressed, _callback = _a._callback, id = _a.id, el = _a.el;
-            if (!_simulatedCallback) {
-                _simulatedCallback = this._simulatedCallback = new Logic(id, el).onUpdate(_callback);
+            if (_simulatedCallback) {
+                _simulatedCallback.onUpdate(_callback);
             }
             // LONG PRESS
             this.on(_eventPress, function (e) {
