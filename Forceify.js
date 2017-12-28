@@ -159,6 +159,7 @@
             this._useSameDurInLeave = false;
             this._isIOS9RealTouchDevices = false;
             this._resetOnLeave = true;
+            this._simulatedCallback = new Logic(forceifyID, el);
             return this;
         }
         Forceify.prototype.getEnv = function () {
@@ -238,30 +239,42 @@
                 }
             }
             e.force = force;
+            this.__forceValue = force;
+            this._simulatedCallback.currentValue.force = force;
             this._callback.call(this, e);
             return false;
         };
+        Forceify.prototype.handleForceEnd = function (e) {
+            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration;
+            if (_simulatedCallback) {
+                _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true);
+            }
+            return this;
+        };
         Forceify.prototype.init = function () {
             var _this = this;
-            var el = this.el;
+            var _a = this.el, el = _a.el, _simulatedCallback = _a._simulatedCallback, _callback = _a._callback;
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
+                _simulatedCallback.onUpdate(_callback);
                 this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
+                this.on('mouseend', function (e) { return _this.handleForceEnd(e); });
                 this._checkResult = 'macOSForce';
                 return this;
             }
             else if ('onmouseforcebegin' in el) {
+                _simulatedCallback.onUpdate(_callback);
                 this.on('mouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('mouseforcechanged', function (e) { return _this.handleForceChange(e); });
+                this.on('mouseend', function (e) { return _this.handleForceEnd(e); });
                 this._checkResult = 'macOSForce';
                 return this;
             }
             else if (_isReal3DTouch) {
-                this.on('webkittouchforcebegin', function (e) { return _this.handleForceChange(e); });
-                this.on('webkittouchforcechanged', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechanged', function (e) { return _this.handleForceChange(e); });
+                this.on('touchend', function (e) { return _this.handleForceEnd(e); });
                 this._checkResult = 'iOSForce';
                 return this;
             }
@@ -290,7 +303,6 @@
                 this._checkResult = root.chrome ? 'Chrome' : 'Desktop';
             }
             this.isPressed = false;
-            this._simulatedCallback = null;
             return this.handleSimulate();
         };
         Forceify.prototype.isChrome = function () {

@@ -49,12 +49,13 @@ declare let exports: any
 
         let _id: number = 0
         class Logic {
+            public currentValue: forceType
             private _queueID: number
+			private __forceValue: number
             private _onUpdate: any
             private _delayTime: number
             private _duration: number
             private _startTime: number
-            private currentValue: forceType
             private startValue: number
             private endValue: number
             private callElem: any
@@ -228,6 +229,7 @@ declare let exports: any
                 this._useSameDurInLeave = false
                 this._isIOS9RealTouchDevices = false
                 this._resetOnLeave = true
+				this._simulatedCallback = new Logic(forceifyID, el)
                 return this
             }
             getEnv() {
@@ -302,27 +304,44 @@ declare let exports: any
                     }
                 }
 				e.force = force
+				this.__forceValue = force
+				this._simulatedCallback.currentValue.force = force
                 this._callback.call(this, e)
                 return false
             }
+			handleForceEnd (e: any) {
+				const {
+                    _simulatedCallback,
+                    _useSameDurInLeave,
+                    _pressDuration,
+                    _leaveDuration
+                } = this
+                if (_simulatedCallback) {
+                    _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
+                }
+				return this
+			}
             init() {
-				const el = this.el
+				const { el, _simulatedCallback, _callback } = this.el
                 this.preventTouchCallout()
                 if ('onwebkitmouseforcebegin' in el) {
+					_simulatedCallback.onUpdate(_callback)
                     this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
                     this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
+                    this.on('mouseend', e => this.handleForceEnd(e))
                     this._checkResult = 'macOSForce'
                     return this
                 } else if ('onmouseforcebegin' in el) {
+					_simulatedCallback.onUpdate(_callback)
                     this.on('mouseforcebegin', e => this.handleForceChange(e))
                     this.on('mouseforcechanged', e => this.handleForceChange(e))
+                    this.on('mouseend', e => this.handleForceEnd(e))
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
-                    this.on('webkittouchforcebegin', e => this.handleForceChange(e))
-                    this.on('webkittouchforcechanged', e => this.handleForceChange(e))
                     this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechanged', e => this.handleForceChange(e))
+                    this.on('touchend', e => this.handleForceEnd(e))
                     this._checkResult = 'iOSForce'
                     return this
                 } else if ('onpointerdown' in el) {
@@ -347,7 +366,6 @@ declare let exports: any
                     this._checkResult = root.chrome ? 'Chrome' : 'Desktop'
                 }
                 this.isPressed = false
-                this._simulatedCallback = null
                 return this.handleSimulate()
             }
             isChrome() {
