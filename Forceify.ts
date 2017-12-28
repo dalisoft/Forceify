@@ -168,12 +168,10 @@ declare let exports: any
             }
         }
 
-        let _isPointerSimulate = 'onpointerdown' in root || 'onmspointerdown' in root
-        let _isMouseSimulate = 'onmousedown' in root
-        let _isTouchSimulate = 'ontouchend' in root || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0
-        let _isRealForceTouch = 'onmouseforcewillbegin' in root || 'onmouseforcechanged' in root || 'onwebkitmouseforcewillbegin' in root || 'onwebkitmouseforcechanged' in root
-        let _isReal3DTouch = 'ontouchforcewillbegin' in root || 'ontouchforcechanged' in root || 'onwebkittouchforcewillbegin' in root || 'onwebkittouchforcechanged' in root
         let _isNonBrowserEnv = 'tabris' in globalEnv || 'tabris' in root || 'tezNative' in globalEnv || 'tezNative' in root
+		let _document = _isNonBrowserEnv || !root.document ? {} : root.document
+        let _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0
+        let _isReal3DTouch = 'ontouchforcewillbegin' in _document.body || 'ontouchforcechanged' in _document.body || 'onwebkittouchforcewillbegin' in root || 'onwebkittouchforcechanged' in _document.body
 
         const getTouch = (e: any, targ: any, changed?: boolean) => {
             let touches = changed ? e.changedTouches : e.touches
@@ -293,47 +291,56 @@ declare let exports: any
                 if (e.stopPropagation) {
                     e.stopPropagation()
                 }
-                if (e.force === undefined) {
-                    if (e.webkitForce !== undefined) {
-                        e.force = e.webkitForce / 3
-                    }
-                } else if (e.force !== undefined) {
-                    e.force /= 3
-                } else {
+				let force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force / 3 : undefined
+                if (force === undefined) {
                     let touches = getTouch(e, this.el, true)
 
                     if (touches.force !== undefined) {
-                        e.force = touches.force
+                        force = touches.force
                     } else if (touches.webkitForce) {
-                        e.force = touches.force
+                        force = touches.force
                     }
                 }
+				e.force = force
                 this._callback.call(this, e)
                 return false
             }
             init() {
+				const el = this.el
                 this.preventTouchCallout()
-                if (_isRealForceTouch) {
+                if ('onwebkitmouseforcebegin' in el) {
+                    this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
                     this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
+                    this._checkResult = 'macOSForce'
+                    return this
+                } else if ('onmouseforcebegin' in el) {
+                    this.on('mouseforcebegin', e => this.handleForceChange(e))
                     this.on('mouseforcechanged', e => this.handleForceChange(e))
-                    this._checkResult = 'macOS'
+                    this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
+                    this.on('webkittouchforcebegin', e => this.handleForceChange(e))
                     this.on('webkittouchforcechanged', e => this.handleForceChange(e))
+                    this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechanged', e => this.handleForceChange(e))
-                    this._checkResult = 'iOS'
+                    this._checkResult = 'iOSForce'
                     return this
-                } else if (_isPointerSimulate) {
+                } else if ('onpointerdown' in el) {
                     this._eventPress = 'pointerdown'
                     this._eventLeave = 'pointerleave'
                     this._eventUp = 'pointerup'
+                    this._checkResult = root.chrome ? 'Chrome' : 'Modern'
+                } else if ('onmspointerdown' in el) {
+                    this._eventPress = 'mspointerdown'
+                    this._eventLeave = 'mspointerleave'
+                    this._eventUp = 'mspointerup'
                     this._checkResult = root.chrome ? 'Chrome' : 'Modern'
                 } else if (_isTouchSimulate) {
                     this._eventPress = 'touchstart'
                     this._eventLeave = 'touchleave'
                     this._eventUp = 'touchend'
                     this._checkResult = root.chrome ? 'ChromeMobile' : 'Touch'
-                } else if (_isMouseSimulate) {
+                } else if ('onmousedown' in el) {
                     this._eventPress = 'mousedown'
                     this._eventLeave = 'mouseup'
                     this._eventUp = 'mouseleave'
@@ -346,11 +353,11 @@ declare let exports: any
             isChrome() {
                 return this._checkResult === 'Chrome' || this._checkResult === 'ChromeMobile'
             }
-            isMacOS() {
-                return this._checkResult === 'macOS'
+            isMacOSForceTouch() {
+                return this._checkResult === 'macOSForce'
             }
-            isIOS() {
-                return this._checkResult === 'iOS'
+            isIOS3DTouch() {
+                return this._checkResult === 'iOSForce'
             }
             isTouch() {
                 return this._checkResult === 'Touch'
@@ -486,25 +493,6 @@ declare let exports: any
                 return this
             }
         }
-
-        const registerEvent = elem => {
-            let force = new Forceify(elem)
-            let event
-            if (typeof Event === 'function') {
-                event = new Event('force')
-            } else if (document.createEvent) {
-                event = document.createEvent('Event')
-                event.initEvent('force', true, true)
-            }
-            return force.onForce(({
-                        force
-                    }) => {
-                event.force = force
-                elem.dispatchEvent(event)
-            })
-        }
-
-        Forceify.RegisterNode = registerEvent
 
         return Forceify
 

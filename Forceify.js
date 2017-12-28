@@ -35,7 +35,7 @@
         }
     });
     var _id = 0;
-    var Logic = (function () {
+    var Logic = /** @class */ (function () {
         function Logic(queueID, elem) {
             this._queueID = queueID;
             this._onUpdate = null;
@@ -118,12 +118,10 @@
         };
         return Logic;
     }());
-    var _isPointerSimulate = 'onpointerdown' in root || 'onmspointerdown' in root;
-    var _isMouseSimulate = 'onmousedown' in root;
-    var _isTouchSimulate = 'ontouchend' in root || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0;
-    var _isRealForceTouch = 'onmouseforcewillbegin' in root || 'onmouseforcechanged' in root || 'onwebkitmouseforcewillbegin' in root || 'onwebkitmouseforcechanged' in root;
-    var _isReal3DTouch = 'ontouchforcewillbegin' in root || 'ontouchforcechanged' in root || 'onwebkittouchforcewillbegin' in root || 'onwebkittouchforcechanged' in root;
     var _isNonBrowserEnv = 'tabris' in globalEnv || 'tabris' in root || 'tezNative' in globalEnv || 'tezNative' in root;
+    var _document = _isNonBrowserEnv || !root.document ? {} : root.document;
+    var _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0;
+    var _isReal3DTouch = 'ontouchforcewillbegin' in _document.body || 'ontouchforcechanged' in _document.body || 'onwebkittouchforcewillbegin' in root || 'onwebkittouchforcechanged' in _document.body;
     var getTouch = function (e, targ, changed) {
         var touches = changed ? e.changedTouches : e.touches;
         if (touches) {
@@ -138,7 +136,7 @@
         }
         return null;
     };
-    var Forceify = (function () {
+    var Forceify = /** @class */ (function () {
         function Forceify(el) {
             var forceifyID = 0;
             if (!el.forceifyQueueId) {
@@ -229,45 +227,54 @@
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
-            if (e.force === undefined) {
-                if (e.webkitForce !== undefined) {
-                    e.force = e.webkitForce / 3;
-                }
-            }
-            else if (e.force !== undefined) {
-                e.force /= 3;
-            }
-            else {
+            var force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force / 3 : undefined;
+            if (force === undefined) {
                 var touches = getTouch(e, this.el, true);
                 if (touches.force !== undefined) {
-                    e.force = touches.force;
+                    force = touches.force;
                 }
                 else if (touches.webkitForce) {
-                    e.force = touches.force;
+                    force = touches.force;
                 }
             }
+            e.force = force;
             this._callback.call(this, e);
             return false;
         };
         Forceify.prototype.init = function () {
             var _this = this;
+            var el = this.el;
             this.preventTouchCallout();
-            if (_isRealForceTouch) {
+            if ('onwebkitmouseforcebegin' in el) {
+                this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
+                this._checkResult = 'macOSForce';
+                return this;
+            }
+            else if ('onmouseforcebegin' in el) {
+                this.on('mouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('mouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this._checkResult = 'macOS';
+                this._checkResult = 'macOSForce';
                 return this;
             }
             else if (_isReal3DTouch) {
+                this.on('webkittouchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkittouchforcechanged', function (e) { return _this.handleForceChange(e); });
+                this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechanged', function (e) { return _this.handleForceChange(e); });
-                this._checkResult = 'iOS';
+                this._checkResult = 'iOSForce';
                 return this;
             }
-            else if (_isPointerSimulate) {
+            else if ('onpointerdown' in el) {
                 this._eventPress = 'pointerdown';
                 this._eventLeave = 'pointerleave';
                 this._eventUp = 'pointerup';
+                this._checkResult = root.chrome ? 'Chrome' : 'Modern';
+            }
+            else if ('onmspointerdown' in el) {
+                this._eventPress = 'mspointerdown';
+                this._eventLeave = 'mspointerleave';
+                this._eventUp = 'mspointerup';
                 this._checkResult = root.chrome ? 'Chrome' : 'Modern';
             }
             else if (_isTouchSimulate) {
@@ -276,7 +283,7 @@
                 this._eventUp = 'touchend';
                 this._checkResult = root.chrome ? 'ChromeMobile' : 'Touch';
             }
-            else if (_isMouseSimulate) {
+            else if ('onmousedown' in el) {
                 this._eventPress = 'mousedown';
                 this._eventLeave = 'mouseup';
                 this._eventUp = 'mouseleave';
@@ -289,11 +296,11 @@
         Forceify.prototype.isChrome = function () {
             return this._checkResult === 'Chrome' || this._checkResult === 'ChromeMobile';
         };
-        Forceify.prototype.isMacOS = function () {
-            return this._checkResult === 'macOS';
+        Forceify.prototype.isMacOSForceTouch = function () {
+            return this._checkResult === 'macOSForce';
         };
-        Forceify.prototype.isIOS = function () {
-            return this._checkResult === 'iOS';
+        Forceify.prototype.isIOS3DTouch = function () {
+            return this._checkResult === 'iOSForce';
         };
         Forceify.prototype.isTouch = function () {
             return this._checkResult === 'Touch';
@@ -399,22 +406,5 @@
         Forceify.__esModule = true;
         return Forceify;
     }());
-    var registerEvent = function (elem) {
-        var force = new Forceify(elem);
-        var event;
-        if (typeof Event === 'function') {
-            event = new Event('force');
-        }
-        else if (document.createEvent) {
-            event = document.createEvent('Event');
-            event.initEvent('force', true, true);
-        }
-        return force.onForce(function (_a) {
-            var force = _a.force;
-            event.force = force;
-            elem.dispatchEvent(event);
-        });
-    };
-    Forceify.RegisterNode = registerEvent;
     return Forceify;
 }));
