@@ -49,14 +49,11 @@
 	// Check if there CSS3 3D-mode available?
 	var is3D = 'perspective' in forceMe.style || 'webkitPerspective' in forceMe.style || 'mozPerspective' in forceMe.style || 'MsPerspective' in forceMe.style || 'msPerspective' in forceMe.style || 'OPerspective' in forceMe.style;
 
+	var __webkitTransform = 'webkitTransform' in forceMe.style ? 'webkitTransform' : 'transform';
+
 	// Setting cross-browser CSS3 Transform set helper
 	var setTransform = function (elem, transform) {
-		elem.style.transform = transform;
-		elem.style.webkitTransform = transform;
-		elem.style.mozTransform = transform;
-		elem.style.MsTransform = transform;
-		elem.style.msTransform = transform;
-		elem.style.OTransform = transform;
+		elem.style[__webkitTransform] = transform;
 	}
 
 	// Node selector
