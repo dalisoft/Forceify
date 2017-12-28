@@ -346,7 +346,6 @@
                 target: el
             };
             _simulatedCallback.onUpdate(function () {
-                console.log(_forceValue);
                 _callback.call(_this, _forceValue);
             });
             this.on(eventType, function (e) {

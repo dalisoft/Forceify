@@ -423,7 +423,6 @@ declare let exports: any
                     target: el
                 }
                 _simulatedCallback.onUpdate(() => {
-					console.log(_forceValue)
                     _callback.call(this, _forceValue)
                 })
                 this.on(eventType, e => {
