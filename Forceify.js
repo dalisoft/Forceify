@@ -245,10 +245,10 @@
             return false;
         };
         Forceify.prototype.handleForceEnd = function (e) {
-            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration;
+            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration, _callback = _a._callback;
             if (_simulatedCallback) {
                 this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force;
-                _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true);
+                _simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true);
             }
             return this;
         };
@@ -274,7 +274,7 @@
                 return this;
             }
             else if (_isReal3DTouch) {
-                _simulatedCallback.onUpdate(_callback);
+                _simulatedCallback.onUpdate(null);
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
                 this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) { return _this.handleForceEnd(e); });

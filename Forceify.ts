@@ -314,11 +314,12 @@ declare let exports: any
                     _simulatedCallback,
                     _useSameDurInLeave,
                     _pressDuration,
-                    _leaveDuration
+                    _leaveDuration,
+					_callback
                 } = this
                 if (_simulatedCallback) {
 					this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force
-                    _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
+                    _simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
                 }
 				return this
 			}
@@ -343,7 +344,7 @@ declare let exports: any
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
-					_simulatedCallback.onUpdate(_callback)
+					_simulatedCallback.onUpdate(null)
                     this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechange', e => this.handleForceChange(e))
                     this.on(isPointerSupported ? 'pointerup' : 'touchend', e => this.handleForceEnd(e))
