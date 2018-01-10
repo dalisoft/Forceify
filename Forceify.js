@@ -121,7 +121,7 @@
     var _isNonBrowserEnv = 'tabris' in globalEnv || 'tabris' in root || 'tezNative' in globalEnv || 'tezNative' in root;
     var _document = _isNonBrowserEnv || !root.document ? {} : root.document;
     var _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0;
-    var _isReal3DTouch = 'ontouchforcewillbegin' in _document.body || 'ontouchforcechanged' in _document.body || 'onwebkittouchforcewillbegin' in root || 'onwebkittouchforcechanged' in _document.body;
+    var _isReal3DTouch = 'ontouchforcechange' in _document.body || 'onwebkitontouchforcechange' in _document.body;
     var getTouch = function (e, targ, changed) {
         var touches = changed ? e.changedTouches : e.touches;
         if (touches) {
@@ -228,7 +228,7 @@
             if (e.stopPropagation) {
                 e.stopPropagation();
             }
-            var force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force / 3 : undefined;
+            var force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force : undefined;
             if (force === undefined) {
                 var touches = getTouch(e, this.el, true);
                 if (touches.force !== undefined) {
@@ -247,6 +247,7 @@
         Forceify.prototype.handleForceEnd = function (e) {
             var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration;
             if (_simulatedCallback) {
+                this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force;
                 _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true);
             }
             return this;
@@ -254,6 +255,7 @@
         Forceify.prototype.init = function () {
             var _this = this;
             var _a = this, el = _a.el, _simulatedCallback = _a._simulatedCallback, _callback = _a._callback;
+            var isPointerSupported = 'onpointerdown' in el;
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
                 _simulatedCallback.onUpdate(_callback);
@@ -272,13 +274,14 @@
                 return this;
             }
             else if (_isReal3DTouch) {
+                _simulatedCallback.onUpdate(_callback);
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
-                this.on('touchforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on('touchend', function (e) { return _this.handleForceEnd(e); });
+                this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
+                this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) { return _this.handleForceEnd(e); });
                 this._checkResult = 'iOSForce';
                 return this;
             }
-            else if ('onpointerdown' in el) {
+            else if (isPointerSupported) {
                 this._eventPress = 'pointerdown';
                 this._eventLeave = 'pointerleave';
                 this._eventUp = 'pointerup';

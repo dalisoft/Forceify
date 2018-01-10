@@ -50,12 +50,12 @@ declare let exports: any
         let _id: number = 0
         class Logic {
             public currentValue: forceType
+            public startValue: number
             private _queueID: number
             private _onUpdate: any
             private _delayTime: number
             private _duration: number
             private _startTime: number
-            private startValue: number
             private endValue: number
             private callElem: any
             private _id: number
@@ -171,7 +171,7 @@ declare let exports: any
         let _isNonBrowserEnv = 'tabris' in globalEnv || 'tabris' in root || 'tezNative' in globalEnv || 'tezNative' in root
 		let _document = _isNonBrowserEnv || !root.document ? {} : root.document
         let _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0
-        let _isReal3DTouch = 'ontouchforcewillbegin' in _document.body || 'ontouchforcechanged' in _document.body || 'onwebkittouchforcewillbegin' in root || 'onwebkittouchforcechanged' in _document.body
+        let _isReal3DTouch = 'ontouchforcechange' in _document.body || 'onwebkitontouchforcechange' in _document.body
 
         const getTouch = (e: any, targ: any, changed?: boolean) => {
             let touches = changed ? e.changedTouches : e.touches
@@ -293,7 +293,7 @@ declare let exports: any
                 if (e.stopPropagation) {
                     e.stopPropagation()
                 }
-				let force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force / 3 : undefined
+				let force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force : undefined
                 if (force === undefined) {
                     let touches = getTouch(e, this.el, true)
 
@@ -317,13 +317,17 @@ declare let exports: any
                     _leaveDuration
                 } = this
                 if (_simulatedCallback) {
+					this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force
                     _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
                 }
 				return this
 			}
             init() {
 				const { el, _simulatedCallback, _callback } = this
+				const isPointerSupported = 'onpointerdown' in el
+
                 this.preventTouchCallout()
+
                 if ('onwebkitmouseforcebegin' in el) {
 					_simulatedCallback.onUpdate(_callback)
                     this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
@@ -339,12 +343,13 @@ declare let exports: any
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
+					_simulatedCallback.onUpdate(_callback)
                     this.on('touchforcebegin', e => this.handleForceChange(e))
-                    this.on('touchforcechanged', e => this.handleForceChange(e))
-                    this.on('touchend', e => this.handleForceEnd(e))
+                    this.on('touchforcechange', e => this.handleForceChange(e))
+                    this.on(isPointerSupported ? 'pointerup' : 'touchend', e => this.handleForceEnd(e))
                     this._checkResult = 'iOSForce'
                     return this
-                } else if ('onpointerdown' in el) {
+                } else if (isPointerSupported) {
                     this._eventPress = 'pointerdown'
                     this._eventLeave = 'pointerleave'
                     this._eventUp = 'pointerup'

@@ -30,6 +30,34 @@
 
     </div>
 
+	<!--script>
+	// false check
+	document.body.ontouchforcechange = function () {}
+
+
+	var forceMe = document.querySelector('#forceMe');
+
+	var registerEvent = function (elem) {
+        var event;
+        if (typeof Event === 'function') {
+            event = new Event('touchforcechange');
+        }
+        else if (document.createEvent) {
+            event = document.createEvent('Event');
+            event.initEvent('touchforcechange', true, true);
+        }
+        forceMe.addEventListener('mousedown', function (_a) {
+            event.force = 1;
+            elem.dispatchEvent(event);
+        });
+        forceMe.addEventListener('mouseup', function (_a) {
+            event.force = 0;
+            elem.dispatchEvent(event);
+        });
+    };
+
+	registerEvent(forceMe);
+	</script-->
     <script type="text/javascript" src="Forceify.js"></script>
 	<script type="text/javascript">
 
