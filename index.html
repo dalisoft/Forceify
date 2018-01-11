@@ -30,7 +30,7 @@
 
     </div>
 
-	<!--script>
+	<script>
 	// false check
 	document.body.ontouchforcechange = function () {}
 
@@ -51,13 +51,13 @@
             elem.dispatchEvent(event);
         });
         forceMe.addEventListener('mouseup', function (_a) {
-            event.force = 0;
+            event.force = 0.06;
             elem.dispatchEvent(event);
         });
     };
 
 	registerEvent(forceMe);
-	</script-->
+	</script>
     <script type="text/javascript" src="Forceify.js"></script>
 	<script type="text/javascript">
 
@@ -92,7 +92,7 @@
 	new Forceify(forceMe).onForce(function(ev) {
 		var force = ev.force;
 		var scale = 1 + (force * 1.5);
-		var transform = is3D ? 'translate3d(-50%, -50%, 0) scale3d(' + scale + ', ' + scale + ', ' + scale + ')' : 'translate(-50%, -50%) scale(' + scale + ')';
+		var transform = 'translate(-50%, -50%) scale(' + scale + ')';
 
 		setTransform(forceMe, transform);
 
@@ -100,7 +100,7 @@
 
 		forceMe.style.backgroundColor = color;
 
-		forceValue.innerHTML = 'Force: ' + force + ', Deep Press:&nbsp;<span style="color:' + color + ';font-weight:' + steppize(force, [100, 200, 300, 400, 500, 600, 700, 800, 900]) + '">' + (isDeepPress(force) ? 'Yes' : 'No') + '</span>';
+		forceValue.innerHTML = 'Force: ' + ((force * 10000) | 0) / 10000 + ', Deep Press:&nbsp;<span style="color:' + color + ';font-weight:' + steppize(force, [100, 200, 300, 400, 500, 600, 700, 800, 900]) + '">' + (isDeepPress(force) ? 'Yes' : 'No') + '</span>';
 	});
 	</script>
 </body>

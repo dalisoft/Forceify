@@ -19,7 +19,8 @@ declare let exports: any
 
         /* Small shim for lighter size */
         let last: number = Date.now()
-        let reqAnimFrame = typeof (requestAnimationFrame) !== 'undefined' ? requestAnimationFrame : (fn) => setTimeout(() => fn(Date.now() - last), 17)
+        let reqAnimFrame = typeof (requestAnimationFrame) !== 'undefined' ? requestAnimationFrame : (fn) => setTimeout(() => fn(Date.now() - last), 50)
+		let cancelAnimFrame = typeof (cancelAnimationFrame) !== 'undefined' ? cancelAnimationFrame : (fn) => clearTimeout(fn)
         if (typeof performance === 'object' && !performance.now) {
             performance.now = () => Date.now() - last
         }
@@ -304,6 +305,25 @@ declare let exports: any
                 }
 				e.force = force
                 this._callback.call(this, e)
+
+				if (force < 0.07 && force > 0) {
+					let forceRounded = ((force * 100) | 0) / 100
+					const threshold = macForce ? 0.03 : 0.02
+					let tickForce
+					if (forceRounded === 0.02 || (macForce || forceRounded === 0.06) || forceRounded === 0.04) {
+						const renderUntilBecomeZero = () => {
+							forceRounded -= threshold
+							if (forceRounded > 0) {
+								tickForce = reqAnimFrame(renderUntilBecomeZero)
+							} else if (forceRounded === 0) {
+								cancelAnimFrame(tickForce)
+							}
+							e.force -= threshold
+							this._callback.call(this, e)
+						}
+						tickForce = reqAnimFrame(renderUntilBecomeZero);
+					}
+				}
                 return false
             }
             init() {

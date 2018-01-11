@@ -13,7 +13,8 @@
     var id = {};
     /* Small shim for lighter size */
     var last = Date.now();
-    var reqAnimFrame = typeof (requestAnimationFrame) !== 'undefined' ? requestAnimationFrame : function (fn) { return setTimeout(function () { return fn(Date.now() - last); }, 17); };
+    var reqAnimFrame = typeof (requestAnimationFrame) !== 'undefined' ? requestAnimationFrame : function (fn) { return setTimeout(function () { return fn(Date.now() - last); }, 50); };
+    var cancelAnimFrame = typeof (cancelAnimationFrame) !== 'undefined' ? cancelAnimationFrame : function (fn) { return clearTimeout(fn); };
     if (typeof performance === 'object' && !performance.now) {
         performance.now = function () { return Date.now() - last; };
     }
@@ -222,6 +223,7 @@
             return this;
         };
         Forceify.prototype.handleForceChange = function (e, macForce) {
+            var _this = this;
             if (e.preventDefault) {
                 e.preventDefault();
             }
@@ -240,6 +242,25 @@
             }
             e.force = force;
             this._callback.call(this, e);
+            if (force < 0.07 && force > 0) {
+                var forceRounded_1 = ((force * 100) | 0) / 100;
+                var threshold_1 = macForce ? 0.03 : 0.02;
+                var tickForce_1;
+                if (forceRounded_1 === 0.02 || (macForce || forceRounded_1 === 0.06) || forceRounded_1 === 0.04) {
+                    var renderUntilBecomeZero_1 = function () {
+                        forceRounded_1 -= threshold_1;
+                        if (forceRounded_1 > 0) {
+                            tickForce_1 = reqAnimFrame(renderUntilBecomeZero_1);
+                        }
+                        else if (forceRounded_1 === 0) {
+                            cancelAnimFrame(tickForce_1);
+                        }
+                        e.force -= threshold_1;
+                        _this._callback.call(_this, e);
+                    };
+                    tickForce_1 = reqAnimFrame(renderUntilBecomeZero_1);
+                }
+            }
             return false;
         };
         Forceify.prototype.init = function () {
