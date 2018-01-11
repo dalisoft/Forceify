@@ -305,7 +305,6 @@ declare let exports: any
                 }
 				e.force = force
 				this.__forceValue = force
-				this._simulatedCallback.currentValue.force = force
                 this._callback.call(this, e)
                 return false
             }
