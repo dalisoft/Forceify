@@ -285,7 +285,7 @@ declare let exports: any
                 }
                 return this
             }
-            handleForceChange(e: any) {
+            handleForceChange(e: any, macForce?: boolean) {
                 if (e.preventDefault) {
                     e.preventDefault()
                 }
@@ -302,7 +302,7 @@ declare let exports: any
                         force = touches.force
                     }
                 }
-				e.force = force
+				e.force = force < (macForce ? 0.061 : 0.021) ? 0 : force
                 this._callback.call(this, e)
                 return false
             }
@@ -313,19 +313,13 @@ declare let exports: any
                 this.preventTouchCallout()
 
                 if ('onwebkitmouseforcebegin' in el) {
-                    this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
-                    this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
-                    this.on('mouseup', e => {
-						e.webkitForce = 0;
-					})
+                    this.on('webkitmouseforcebegin', e => this.handleForceChange(e, true))
+                    this.on('webkitmouseforcechanged', e => this.handleForceChange(e, true))
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
                     this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechange', e => this.handleForceChange(e))
-                    this.on(isPointerSupported ? 'pointerup' : 'touchend', e => {
-						e.force = 0;
-					})
                     this._checkResult = 'iOSForce'
                     return this
                 } else if (isPointerSupported) {

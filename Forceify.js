@@ -221,7 +221,7 @@
             }
             return this;
         };
-        Forceify.prototype.handleForceChange = function (e) {
+        Forceify.prototype.handleForceChange = function (e, macForce) {
             if (e.preventDefault) {
                 e.preventDefault();
             }
@@ -238,7 +238,7 @@
                     force = touches.force;
                 }
             }
-            e.force = force;
+            e.force = force < (macForce ? 0.061 : 0.021) ? 0 : force;
             this._callback.call(this, e);
             return false;
         };
@@ -248,20 +248,14 @@
             var isPointerSupported = 'onpointerdown' in el;
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
-                this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
-                this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on('mouseup', function (e) {
-                    e.webkitForce = 0;
-                });
+                this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e, true); });
+                this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e, true); });
                 this._checkResult = 'macOSForce';
                 return this;
             }
             else if (_isReal3DTouch) {
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
-                this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) {
-                    e.force = 0;
-                });
                 this._checkResult = 'iOSForce';
                 return this;
             }
