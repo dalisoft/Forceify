@@ -30,10 +30,11 @@ You should load script first for working snippet...
 ```javascript
 class MyApp extends Component {
 	componentDidMount () {
-		let node = this.findDOMNode(this);
-		Forceify.RegisterNode(node);
+		new Forceify(this.refs.lorem01).onForce(({force}) => {
+			console.log(force);
+		});
 	}
-	render () { <Lorem {...}><Ipsum/><Dolor/></Lorem> }
+	render () { <Lorem ref="lorem01" {...}><Ipsum/><Dolor/></Lorem> }
 }
 
 render(<MyApp/>, myMountTarget);
@@ -49,9 +50,9 @@ var forceInstance = new Forceify(yourDOMNodeReference);
 
 # Methods
 * `forceInstance.on` - `@type Function` - simplified and cross-browser(env) `addEventListener` alternative
-* `forceInstance.isTouch` - `@type Function` - returns `true` if it's touch-device and runs on non-Chrome browser
+* `forceInstance.isIOS3DTouch` - `@type Function` - returns `true` if it's touch-device and runs on non-Chrome browser
 * `forceInstance.isChrome` - `@type Function` - returns `true` if it's Chrome browser
-* `forceInstance.isMacOS`, `forceInstance.isIOS` - `@type Function` - returns `true` if it's Apple device's
+* `forceInstance.isMacOSForceTouch`, `forceInstance.isIOS` - `@type Function` - returns `true` if it's Apple device's
 * `forceInstance.isMouse` - `@type Function` - returns `true` if it's mouse-powered device
 
 
