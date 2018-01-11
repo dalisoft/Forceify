@@ -325,6 +325,7 @@ declare let exports: any
                     this.on('touchforcechange', e => this.handleForceChange(e))
                     this.on(isPointerSupported ? 'pointerup' : 'touchend', e => {
 						e.force = 0;
+						alert('Bug there #2');
 					})
                     this._checkResult = 'iOSForce'
                     return this
@@ -408,7 +409,7 @@ declare let exports: any
                 }
 				_forceValue.force = 0
                 _simulatedCallback.onUpdate(() => {
-					alert('Bug there');
+					alert('Bug there #1');
                     _callback.call(this, _forceValue)
                 })
                 this.on(eventType, e => {
