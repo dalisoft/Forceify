@@ -239,7 +239,6 @@
                 }
             }
             e.force = force;
-            this.__forceValue = force;
             this._callback.call(this, e);
             return false;
         };
@@ -331,6 +330,7 @@
             }
             _forceValue.force = 0;
             _simulatedCallback.onUpdate(function () {
+                alert('Bug there');
                 _callback.call(_this, _forceValue);
             });
             this.on(eventType, function (e) {

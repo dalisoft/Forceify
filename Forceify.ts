@@ -205,7 +205,6 @@ declare let exports: any
             private _useSameDurInLeave: boolean
             private _resetOnLeave: boolean
             private _isIOS9RealTouchDevices: boolean
-			private __forceValue: number
             public static RegisterNode: any
 			public static __esModule: boolean = true
             constructor(el) {
@@ -304,7 +303,6 @@ declare let exports: any
                     }
                 }
 				e.force = force
-				this.__forceValue = force
                 this._callback.call(this, e)
                 return false
             }
@@ -397,7 +395,7 @@ declare let exports: any
                 }
                 return this
             }
-            handleIOS9ForceTouch(_forceValue) {
+            handleIOS9ForceTouch(_forceValue: any) {
                 const eventType = 'touchmove'
                 const {
                     _simulatedCallback,
@@ -410,6 +408,7 @@ declare let exports: any
                 }
 				_forceValue.force = 0
                 _simulatedCallback.onUpdate(() => {
+					alert('Bug there');
                     _callback.call(this, _forceValue)
                 })
                 this.on(eventType, e => {
