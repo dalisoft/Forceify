@@ -261,7 +261,7 @@
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
                 this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) {
                     e.force = 0;
-                    alert('Bug there #2');
+                    // bug here
                 });
                 this._checkResult = 'iOSForce';
                 return this;
@@ -331,7 +331,6 @@
             }
             _forceValue.force = 0;
             _simulatedCallback.onUpdate(function () {
-                alert('Bug there #1');
                 _callback.call(_this, _forceValue);
             });
             this.on(eventType, function (e) {
