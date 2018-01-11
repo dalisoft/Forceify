@@ -159,7 +159,7 @@
             this._useSameDurInLeave = false;
             this._isIOS9RealTouchDevices = false;
             this._resetOnLeave = true;
-            this._simulatedCallback = new Logic(forceifyID, el);
+            this.el = el;
             return this;
         }
         Forceify.prototype.getEnv = function () {
@@ -244,40 +244,26 @@
             this._callback.call(this, e);
             return false;
         };
-        Forceify.prototype.handleForceEnd = function (e) {
-            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration, _callback = _a._callback;
-            if (_simulatedCallback) {
-                this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force;
-                //_simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
-            }
-            return this;
-        };
         Forceify.prototype.init = function () {
             var _this = this;
-            var _a = this, el = _a.el, _simulatedCallback = _a._simulatedCallback, _callback = _a._callback;
+            var el = this.el;
             var isPointerSupported = 'onpointerdown' in el;
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
-                _simulatedCallback.onUpdate(null);
                 this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on('mouseup', function (e) { return _this.handleForceEnd(e); });
-                this._checkResult = 'macOSForce';
-                return this;
-            }
-            else if ('onmouseforcebegin' in el) {
-                _simulatedCallback.onUpdate(null);
-                this.on('mouseforcebegin', function (e) { return _this.handleForceChange(e); });
-                this.on('mouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on('mouseup', function (e) { return _this.handleForceEnd(e); });
+                this.on('mouseup', function (e) {
+                    e.webkitForce = 0;
+                });
                 this._checkResult = 'macOSForce';
                 return this;
             }
             else if (_isReal3DTouch) {
-                _simulatedCallback.onUpdate(null);
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
-                this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) { return _this.handleForceEnd(e); });
+                this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) {
+                    e.force = 0;
+                });
                 this._checkResult = 'iOSForce';
                 return this;
             }
@@ -324,30 +310,27 @@
             return this._checkResult === 'Desktop';
         };
         Forceify.prototype.handleLeave = function () {
-            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration;
+            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration, forceifyID = _a.id, el = _a.el;
             if (_simulatedCallback) {
                 _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true);
             }
             return this;
         };
         Forceify.prototype.handlePress = function () {
-            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _delay = _a._delay;
+            var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _delay = _a._delay, forceifyID = _a.id, el = _a.el;
             if (_simulatedCallback) {
                 _simulatedCallback.duration(_pressDuration).delay(_delay).start();
             }
             return this;
         };
-        Forceify.prototype.handleIOS9ForceTouch = function () {
+        Forceify.prototype.handleIOS9ForceTouch = function (_forceValue) {
             var _this = this;
             var eventType = 'touchmove';
             var _a = this, _simulatedCallback = _a._simulatedCallback, _isIOS9RealTouchDevices = _a._isIOS9RealTouchDevices, _callback = _a._callback, el = _a.el;
             if (!_isIOS9RealTouchDevices || !_simulatedCallback) {
                 return this;
             }
-            var _forceValue = {
-                force: 0,
-                target: el
-            };
+            _forceValue.force = 0;
             _simulatedCallback.onUpdate(function () {
                 _callback.call(_this, _forceValue);
             });
@@ -369,7 +352,10 @@
         };
         Forceify.prototype.handleSimulate = function () {
             var _this = this;
-            var _a = this, _simulatedCallback = _a._simulatedCallback, _isIOS9RealTouchDevices = _a._isIOS9RealTouchDevices, _eventPress = _a._eventPress, _eventUp = _a._eventUp, _eventLeave = _a._eventLeave, isPressed = _a.isPressed, _callback = _a._callback, id = _a.id, el = _a.el;
+            var _a = this, _simulatedCallback = _a._simulatedCallback, _isIOS9RealTouchDevices = _a._isIOS9RealTouchDevices, _eventPress = _a._eventPress, _eventUp = _a._eventUp, _eventLeave = _a._eventLeave, isPressed = _a.isPressed, _callback = _a._callback, forceifyID = _a.id, el = _a.el;
+            if (!_simulatedCallback) {
+                _simulatedCallback = this._simulatedCallback = new Logic(forceifyID, el);
+            }
             if (_simulatedCallback) {
                 _simulatedCallback.onUpdate(_callback);
             }
@@ -388,7 +374,7 @@
                             if (touches) {
                                 if (touches.force !== undefined || touches.webkitForce !== undefined) {
                                     _this._isIOS9RealTouchDevices = _isIOS9RealTouchDevices = true;
-                                    _this.handleIOS9ForceTouch();
+                                    _this.handleIOS9ForceTouch(e);
                                 }
                             }
                         }

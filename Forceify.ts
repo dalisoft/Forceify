@@ -229,7 +229,7 @@ declare let exports: any
                 this._useSameDurInLeave = false
                 this._isIOS9RealTouchDevices = false
                 this._resetOnLeave = true
-				this._simulatedCallback = new Logic(forceifyID, el)
+				this.el = el
                 return this
             }
             getEnv() {
@@ -309,45 +309,26 @@ declare let exports: any
                 this._callback.call(this, e)
                 return false
             }
-			handleForceEnd (e: any) {
-				const {
-                    _simulatedCallback,
-                    _useSameDurInLeave,
-                    _pressDuration,
-                    _leaveDuration,
-					_callback
-                } = this
-                if (_simulatedCallback) {
-					this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force
-                    //_simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
-                }
-				return this
-			}
             init() {
-				const { el, _simulatedCallback, _callback } = this
+				const { el } = this
 				const isPointerSupported = 'onpointerdown' in el
 
                 this.preventTouchCallout()
 
                 if ('onwebkitmouseforcebegin' in el) {
-					_simulatedCallback.onUpdate(null)
                     this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
                     this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
-                    this.on('mouseup', e => this.handleForceEnd(e))
-                    this._checkResult = 'macOSForce'
-                    return this
-                } else if ('onmouseforcebegin' in el) {
-					_simulatedCallback.onUpdate(null)
-                    this.on('mouseforcebegin', e => this.handleForceChange(e))
-                    this.on('mouseforcechanged', e => this.handleForceChange(e))
-                    this.on('mouseup', e => this.handleForceEnd(e))
+                    this.on('mouseup', e => {
+						e.webkitForce = 0;
+					})
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
-					_simulatedCallback.onUpdate(null)
                     this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechange', e => this.handleForceChange(e))
-                    this.on(isPointerSupported ? 'pointerup' : 'touchend', e => this.handleForceEnd(e))
+                    this.on(isPointerSupported ? 'pointerup' : 'touchend', e => {
+						e.force = 0;
+					})
                     this._checkResult = 'iOSForce'
                     return this
                 } else if (isPointerSupported) {
@@ -390,11 +371,13 @@ declare let exports: any
                 return this._checkResult === 'Desktop'
             }
             handleLeave() {
-                const {
+                let {
                     _simulatedCallback,
                     _useSameDurInLeave,
                     _pressDuration,
-                    _leaveDuration
+                    _leaveDuration,
+					id: forceifyID,
+					el
                 } = this
                 if (_simulatedCallback) {
                     _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
@@ -402,18 +385,20 @@ declare let exports: any
                 return this
             }
             handlePress() {
-                const {
+                let {
                     _simulatedCallback,
                     _useSameDurInLeave,
                     _pressDuration,
-                    _delay
+                    _delay,
+					id: forceifyID,
+					el
                 } = this
                 if (_simulatedCallback) {
                     _simulatedCallback.duration(_pressDuration).delay(_delay).start()
                 }
                 return this
             }
-            handleIOS9ForceTouch() {
+            handleIOS9ForceTouch(_forceValue) {
                 const eventType = 'touchmove'
                 const {
                     _simulatedCallback,
@@ -424,10 +409,7 @@ declare let exports: any
                 if (!_isIOS9RealTouchDevices || !_simulatedCallback) {
                     return this
                 }
-                let _forceValue = {
-                    force: 0,
-                    target: el
-                }
+				_forceValue.force = 0
                 _simulatedCallback.onUpdate(() => {
                     _callback.call(this, _forceValue)
                 })
@@ -461,10 +443,13 @@ declare let exports: any
                     _eventLeave,
                     isPressed,
                     _callback,
-                    id,
+                    id: forceifyID,
                     el
                 } = this
 
+				if (!_simulatedCallback) {
+					_simulatedCallback = this._simulatedCallback = new Logic(forceifyID, el)
+				}
                 if (_simulatedCallback) {
                     _simulatedCallback.onUpdate(_callback)
                 }
@@ -484,7 +469,7 @@ declare let exports: any
                                 if (touches) {
                                     if (touches.force !== undefined || touches.webkitForce !== undefined) {
                                         this._isIOS9RealTouchDevices = _isIOS9RealTouchDevices = true
-                                        this.handleIOS9ForceTouch()
+                                        this.handleIOS9ForceTouch(e)
                                     }
                                 }
                             }
