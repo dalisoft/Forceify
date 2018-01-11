@@ -40,16 +40,6 @@ render(<MyApp/>, myMountTarget);
 ```
 
 ```javascript
-Forceify.RegisterNode(yourDOMNodeReference)
-
-// The easiest way do it
-yourDOMNodeReference.addEventListener('force', function (e) {
-var force = e.force;
-console.log(force);
-});
-
-// or
-
 var forceInstance = new Forceify(yourDOMNodeReference);
 	forceInstance.onForce(function(e){
 	var force = e.force;
