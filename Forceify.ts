@@ -319,7 +319,7 @@ declare let exports: any
                 } = this
                 if (_simulatedCallback) {
 					this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force
-                    _simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
+                    //_simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
                 }
 				return this
 			}
@@ -330,14 +330,14 @@ declare let exports: any
                 this.preventTouchCallout()
 
                 if ('onwebkitmouseforcebegin' in el) {
-					_simulatedCallback.onUpdate(_callback)
+					_simulatedCallback.onUpdate(null)
                     this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
                     this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
                     this.on('mouseup', e => this.handleForceEnd(e))
                     this._checkResult = 'macOSForce'
                     return this
                 } else if ('onmouseforcebegin' in el) {
-					_simulatedCallback.onUpdate(_callback)
+					_simulatedCallback.onUpdate(null)
                     this.on('mouseforcebegin', e => this.handleForceChange(e))
                     this.on('mouseforcechanged', e => this.handleForceChange(e))
                     this.on('mouseup', e => this.handleForceEnd(e))

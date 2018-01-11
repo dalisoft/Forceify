@@ -248,7 +248,7 @@
             var _a = this, _simulatedCallback = _a._simulatedCallback, _useSameDurInLeave = _a._useSameDurInLeave, _pressDuration = _a._pressDuration, _leaveDuration = _a._leaveDuration, _callback = _a._callback;
             if (_simulatedCallback) {
                 this._simulatedCallback.startValue = this._simulatedCallback.currentValue.force;
-                _simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true);
+                //_simulatedCallback.onUpdate(_callback).duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
             }
             return this;
         };
@@ -258,7 +258,7 @@
             var isPointerSupported = 'onpointerdown' in el;
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
-                _simulatedCallback.onUpdate(_callback);
+                _simulatedCallback.onUpdate(null);
                 this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
                 this.on('mouseup', function (e) { return _this.handleForceEnd(e); });
@@ -266,7 +266,7 @@
                 return this;
             }
             else if ('onmouseforcebegin' in el) {
-                _simulatedCallback.onUpdate(_callback);
+                _simulatedCallback.onUpdate(null);
                 this.on('mouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('mouseforcechanged', function (e) { return _this.handleForceChange(e); });
                 this.on('mouseup', function (e) { return _this.handleForceEnd(e); });
