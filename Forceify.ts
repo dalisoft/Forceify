@@ -325,7 +325,6 @@ declare let exports: any
                     this.on('touchforcechange', e => this.handleForceChange(e))
                     this.on(isPointerSupported ? 'pointerup' : 'touchend', e => {
 						e.force = 0;
-						// bug here
 					})
                     this._checkResult = 'iOSForce'
                     return this

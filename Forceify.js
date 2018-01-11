@@ -261,7 +261,6 @@
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
                 this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) {
                     e.force = 0;
-                    // bug here
                 });
                 this._checkResult = 'iOSForce';
                 return this;
