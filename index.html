@@ -100,7 +100,7 @@
 
 		forceMe.style.backgroundColor = color;
 
-		forceValue.innerHTML = 'Force: ' + ((force * 10000) | 0) / 10000 + ', Deep Press:&nbsp;<span style="color:' + color + ';font-weight:' + steppize(force, [100, 200, 300, 400, 500, 600, 700, 800, 900]) + '">' + (isDeepPress(force) ? 'Yes' : 'No') + '</span>';
+		forceValue.innerHTML = 'Force: ' + force + ', Deep Press:&nbsp;<span style="color:' + color + ';font-weight:' + steppize(force, [100, 200, 300, 400, 500, 600, 700, 800, 900]) + '">' + (isDeepPress(force) ? 'Yes' : 'No') + '</span>';
 	});
 	</script>
 </body>

@@ -238,7 +238,7 @@
                     force = touches.force;
                 }
             }
-            e.force = force < (macForce ? 0.061 : 0.021) ? 0 : force;
+            e.force = force;
             this._callback.call(this, e);
             return false;
         };
