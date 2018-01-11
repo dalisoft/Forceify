@@ -222,8 +222,7 @@
             }
             return this;
         };
-        Forceify.prototype.handleForceChange = function (e, macForce) {
-            var _this = this;
+        Forceify.prototype.handleForceChange = function (e) {
             if (e.preventDefault) {
                 e.preventDefault();
             }
@@ -241,42 +240,56 @@
                 }
             }
             e.force = force;
+            this.__force = force;
             this._callback.call(this, e);
-            if (force < 0.07 && force > 0) {
-                var forceRounded_1 = ((force * 100) | 0) / 100;
-                var threshold_1 = macForce ? 0.03 : 0.02;
-                var tickForce_1;
-                if (forceRounded_1 === 0.02 || (macForce || forceRounded_1 === 0.06) || forceRounded_1 === 0.04) {
-                    var renderUntilBecomeZero_1 = function () {
-                        forceRounded_1 -= threshold_1;
-                        if (forceRounded_1 > 0) {
-                            tickForce_1 = reqAnimFrame(renderUntilBecomeZero_1);
-                        }
-                        else if (forceRounded_1 === 0) {
-                            cancelAnimFrame(tickForce_1);
-                        }
-                        e.force -= threshold_1;
-                        _this._callback.call(_this, e);
-                    };
-                    tickForce_1 = reqAnimFrame(renderUntilBecomeZero_1);
-                }
-            }
             return false;
         };
         Forceify.prototype.init = function () {
             var _this = this;
             var el = this.el;
             var isPointerSupported = 'onpointerdown' in el;
+            var tickForce;
+            var perfNow;
+            var currentEvent;
+            var renderUntilBecomeZero = function (time) {
+                var __force = _this.__force;
+                var force = (1 - Math.min(((time - perfNow) / _this._leaveDuration), 1)) * __force;
+                if (force > 0) {
+                    tickForce = reqAnimFrame(renderUntilBecomeZero);
+                }
+                else if (force === 0) {
+                    cancelAnimFrame(tickForce);
+                }
+                currentEvent.force = force;
+                _this.__force = force;
+                _this.handleForceChange(currentEvent);
+            };
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
-                this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e, true); });
-                this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e, true); });
+                this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
+                this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
+                this.on(isPointerSupported ? 'pointerup' : 'mouseup', function (e) {
+                    var force = _this.__force;
+                    currentEvent = e;
+                    if (force > 0) {
+                        perfNow = performance.now();
+                        tickForce = reqAnimFrame(renderUntilBecomeZero);
+                    }
+                });
                 this._checkResult = 'macOSForce';
                 return this;
             }
             else if (_isReal3DTouch) {
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
+                this.on(isPointerSupported ? 'pointerup' : 'touchend', function (e) {
+                    var force = _this.__force;
+                    currentEvent = e;
+                    if (force > 0) {
+                        perfNow = performance.now();
+                        tickForce = reqAnimFrame(renderUntilBecomeZero);
+                    }
+                });
                 this._checkResult = 'iOSForce';
                 return this;
             }

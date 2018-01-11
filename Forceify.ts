@@ -20,7 +20,7 @@ declare let exports: any
         /* Small shim for lighter size */
         let last: number = Date.now()
         let reqAnimFrame = typeof (requestAnimationFrame) !== 'undefined' ? requestAnimationFrame : (fn) => setTimeout(() => fn(Date.now() - last), 50)
-		let cancelAnimFrame = typeof (cancelAnimationFrame) !== 'undefined' ? cancelAnimationFrame : (fn) => clearTimeout(fn)
+        let cancelAnimFrame = typeof (cancelAnimationFrame) !== 'undefined' ? cancelAnimationFrame : (fn) => clearTimeout(fn)
         if (typeof performance === 'object' && !performance.now) {
             performance.now = () => Date.now() - last
         }
@@ -170,7 +170,7 @@ declare let exports: any
         }
 
         let _isNonBrowserEnv = 'tabris' in globalEnv || 'tabris' in root || 'tezNative' in globalEnv || 'tezNative' in root
-		let _document = _isNonBrowserEnv || !root.document ? {} : root.document
+        let _document = _isNonBrowserEnv || !root.document ? {} : root.document
         let _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0
         let _isReal3DTouch = 'ontouchforcechange' in _document.body || 'onwebkitontouchforcechange' in _document.body
 
@@ -206,8 +206,9 @@ declare let exports: any
             private _useSameDurInLeave: boolean
             private _resetOnLeave: boolean
             private _isIOS9RealTouchDevices: boolean
+            private __force: number
             public static RegisterNode: any
-			public static __esModule: boolean = true
+            public static __esModule: boolean = true
             constructor(el) {
                 let forceifyID = 0
                 if (!el.forceifyQueueId) {
@@ -229,7 +230,7 @@ declare let exports: any
                 this._useSameDurInLeave = false
                 this._isIOS9RealTouchDevices = false
                 this._resetOnLeave = true
-				this.el = el
+                this.el = el
                 return this
             }
             getEnv() {
@@ -286,14 +287,14 @@ declare let exports: any
                 }
                 return this
             }
-            handleForceChange(e: any, macForce?: boolean) {
+            handleForceChange(e: any) {
                 if (e.preventDefault) {
                     e.preventDefault()
                 }
                 if (e.stopPropagation) {
                     e.stopPropagation()
                 }
-				let force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force : undefined
+                let force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force : undefined
                 if (force === undefined) {
                     let touches = getTouch(e, this.el, true)
 
@@ -303,43 +304,65 @@ declare let exports: any
                         force = touches.force
                     }
                 }
-				e.force = force
+                e.force = force
+                this.__force = force
                 this._callback.call(this, e)
-
-				if (force < 0.07 && force > 0) {
-					let forceRounded = ((force * 100) | 0) / 100
-					const threshold = macForce ? 0.03 : 0.02
-					let tickForce
-					if (forceRounded === 0.02 || (macForce || forceRounded === 0.06) || forceRounded === 0.04) {
-						const renderUntilBecomeZero = () => {
-							forceRounded -= threshold
-							if (forceRounded > 0) {
-								tickForce = reqAnimFrame(renderUntilBecomeZero)
-							} else if (forceRounded === 0) {
-								cancelAnimFrame(tickForce)
-							}
-							e.force -= threshold
-							this._callback.call(this, e)
-						}
-						tickForce = reqAnimFrame(renderUntilBecomeZero);
-					}
-				}
                 return false
             }
             init() {
-				const { el } = this
-				const isPointerSupported = 'onpointerdown' in el
+                const { el } = this
+                const isPointerSupported = 'onpointerdown' in el
+
+                let tickForce
+                let perfNow
+                let currentEvent
+                const renderUntilBecomeZero = time => {
+                    const { __force } = this
+                    let force = (1 - Math.min(((time - perfNow) / this._leaveDuration), 1)) * __force
+                    if (force > 0) {
+                        tickForce = reqAnimFrame(renderUntilBecomeZero)
+                    } else if (force === 0) {
+                        cancelAnimFrame(tickForce)
+                    }
+                    currentEvent.force = force
+                    this.__force = force
+                    this.handleForceChange(currentEvent)
+                }
 
                 this.preventTouchCallout()
 
                 if ('onwebkitmouseforcebegin' in el) {
-                    this.on('webkitmouseforcebegin', e => this.handleForceChange(e, true))
-                    this.on('webkitmouseforcechanged', e => this.handleForceChange(e, true))
+                    this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
+                    this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
+                    this.on(isPointerSupported ? 'pointerup' : 'mouseup', e => {
+                        const { __force: force } = this
+
+                        currentEvent = e
+
+                        if (force > 0) {
+                            perfNow = performance.now()
+
+                            tickForce = reqAnimFrame(renderUntilBecomeZero);
+                        }
+
+                    })
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
                     this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechange', e => this.handleForceChange(e))
+                    this.on(isPointerSupported ? 'pointerup' : 'touchend', e => {
+                        const { __force: force } = this
+
+                        currentEvent = e
+
+                        if (force > 0) {
+                            perfNow = performance.now()
+
+                            tickForce = reqAnimFrame(renderUntilBecomeZero);
+                        }
+
+                    })
                     this._checkResult = 'iOSForce'
                     return this
                 } else if (isPointerSupported) {
@@ -387,8 +410,8 @@ declare let exports: any
                     _useSameDurInLeave,
                     _pressDuration,
                     _leaveDuration,
-					id: forceifyID,
-					el
+                    id: forceifyID,
+                    el
                 } = this
                 if (_simulatedCallback) {
                     _simulatedCallback.duration(_useSameDurInLeave ? _pressDuration : _leaveDuration).delay(0).restart(true)
@@ -401,8 +424,8 @@ declare let exports: any
                     _useSameDurInLeave,
                     _pressDuration,
                     _delay,
-					id: forceifyID,
-					el
+                    id: forceifyID,
+                    el
                 } = this
                 if (_simulatedCallback) {
                     _simulatedCallback.duration(_pressDuration).delay(_delay).start()
@@ -420,7 +443,7 @@ declare let exports: any
                 if (!_isIOS9RealTouchDevices || !_simulatedCallback) {
                     return this
                 }
-				_forceValue.force = 0
+                _forceValue.force = 0
                 _simulatedCallback.onUpdate(() => {
                     _callback.call(this, _forceValue)
                 })
@@ -458,9 +481,9 @@ declare let exports: any
                     el
                 } = this
 
-				if (!_simulatedCallback) {
-					_simulatedCallback = this._simulatedCallback = new Logic(forceifyID, el)
-				}
+                if (!_simulatedCallback) {
+                    _simulatedCallback = this._simulatedCallback = new Logic(forceifyID, el)
+                }
                 if (_simulatedCallback) {
                     _simulatedCallback.onUpdate(_callback)
                 }
