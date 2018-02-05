@@ -60,7 +60,8 @@ declare let exports: any
             private endValue: number
             private callElem: any
             private _id: number
-            constructor(queueID: number, elem) {
+			private __self: Forceify
+            constructor(queueID: number, elem, self) {
                 this._queueID = queueID
                 this._onUpdate = null
                 this._duration = 200
@@ -72,6 +73,7 @@ declare let exports: any
                     force: 0,
                     target: elem
                 }
+				this.__self = self
                 this.endValue = 1
                 this.callElem = elem
             }
@@ -145,7 +147,8 @@ declare let exports: any
                     currentValue,
                     startValue,
                     endValue,
-                    callElem
+                    callElem,
+					__self
                 } = this
 
                 if (time < _startTime) {
@@ -155,7 +158,7 @@ declare let exports: any
                 let elapsed = (time - _startTime) / _duration
                 elapsed = elapsed > 1 ? 1 : elapsed
 
-                currentValue.force = startValue + (endValue - startValue) * elapsed
+                currentValue.force = (__self.__force !== undefined && __self.__force !== 0 && __self.__force !== 1) ? __self.__force : startValue + (endValue - startValue) * elapsed
 
                 if (_onUpdate) {
                     _onUpdate.call(callElem, currentValue)
@@ -172,7 +175,7 @@ declare let exports: any
         let _isNonBrowserEnv = 'tabris' in globalEnv || 'tabris' in root || 'tezNative' in globalEnv || 'tezNative' in root
         let _document = _isNonBrowserEnv || !root.document ? {} : root.document
         let _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0
-        let _isReal3DTouch = 'ontouchforcechange' in _document.body || 'onwebkitontouchforcechange' in _document.body
+        let _isReal3DTouch = 'ontouchforcechange' in _document.body
 
         const getTouch = (e: any, targ: any, changed?: boolean) => {
             let touches = changed ? e.changedTouches : e.touches
@@ -205,8 +208,9 @@ declare let exports: any
             private _checkResult: string
             private _useSameDurInLeave: boolean
             private _resetOnLeave: boolean
-            private _isIOS9RealTouchDevices: boolean
-            private __force: number
+			private _iterateOfHandleForceChange: number
+			private _calledTimeout: boolean
+            public __force: number
             public static RegisterNode: any
             public static __esModule: boolean = true
             constructor(el) {
@@ -228,7 +232,6 @@ declare let exports: any
                 this._eventUp = null
                 this._checkResult = null
                 this._useSameDurInLeave = false
-                this._isIOS9RealTouchDevices = false
                 this._resetOnLeave = true
                 this.el = el
                 return this
@@ -274,17 +277,32 @@ declare let exports: any
                 }
                 return this
             }
+            off(eventName: string, callbackListener: Function, capture?: any) {
+                if (_isNonBrowserEnv) {
+                    this.el.off(eventName, callbackListener)
+                } else if (root.removeEventListener) {
+                    this.el.removeEventListener(eventName, callbackListener, capture)
+                } else if (root.detachEvent) {
+                    this.el.detachEvent('on' + eventName, callbackListener)
+                } else {
+                    this.el['on' + eventName] = null
+                }
+                return this
+            }
             preventTouchCallout() {
                 const el = this.el
-                const touchCallout = ['webkitTouchCallout', 'MozTouchCallout', 'msTouchCallout', 'khtmlUserSelect', 'touchCallout', 'webkitUserSelect', 'MozUserSelect', 'msUserSelect', 'khtmlUserSelect', 'userSelect', 'webkitUserDrag', 'MozUserDrag', 'msUserDrag', 'khtmlUserDrag', 'userDrag', 'webkitTouchAction', 'mozTouchAction', 'msTouchAction', 'khtmlTouchAction', 'touchAction']
-                const touchCalloutLen = touchCallout.length
-                let i = 0
-                for (; i < touchCalloutLen; i++) {
-                    const property = touchCallout[i]
+                const touchCallout = ['webkitTouchCallout', 'MozTouchCallout', 'msTouchCallout', 'khtmlUserSelect', 'touchCallout', 'webkitUserSelect', 'MozUserSelect', 'msUserSelect', 'khtmlUserSelect', 'userSelect', 'webkitUserDrag', 'MozUserDrag', 'msUserDrag', 'khtmlUserDrag', 'userDrag']
+                for (let property of touchCallout) {
                     if (property in el.style) {
                         el.style[property] = 'none'
                     }
                 }
+				const touchActions = ['webkitTouchAction', 'mozTouchAction', 'msTouchAction', 'khtmlTouchAction', 'touchAction']
+				for (let property of touchActions) {
+					if (property in el.style) {
+                        el.style[property] = 'manipulation'
+                    }
+				}
                 return this
             }
             handleForceChange(e: any) {
@@ -294,6 +312,7 @@ declare let exports: any
                 if (e.stopPropagation) {
                     e.stopPropagation()
                 }
+				this._iterateOfHandleForceChange++
                 let force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force : undefined
                 if (force === undefined) {
                     let touches = getTouch(e, this.el, true)
@@ -306,6 +325,8 @@ declare let exports: any
                 }
                 e.force = force
                 this.__force = force
+
+				this._calledTimeout = true
                 this._callback.call(this, e)
                 return false
             }
@@ -349,9 +370,27 @@ declare let exports: any
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
+					const __self$1 = this
+					this._iterateOfHandleForceChange = 0
+					let _touchTicks = 0
+
                     this.on('touchforcebegin', e => this.handleForceChange(e))
                     this.on('touchforcechange', e => this.handleForceChange(e))
-                    this.on(isPointerSupported ? 'pointerup' : 'touchend', e => {
+					this.on('touchstart', function check3DTouch (e) {
+						_touchTicks++
+						if (_touchTicks > 0 && __self$1._iterateOfHandleForceChange === 0) {
+							_isReal3DTouch = false
+							__self$1._eventPress = 'touchstart'
+							__self$1._eventLeave = 'touchleave'
+							__self$1._eventUp = 'touchend'
+							__self$1._checkResult = root.chrome ? 'ChromeMobile' : 'Touch'
+							__self$1.isPressed = true
+							__self$1.handleSimulate()
+							__self$1.handlePress()
+							__self$1.off('touchstart', check3DTouch)
+						}
+					})
+                    this.on('touchend', e => {
                         const { __force: force } = this
 
                         currentEvent = e
@@ -363,6 +402,7 @@ declare let exports: any
                         }
 
                     })
+
                     this._checkResult = 'iOSForce'
                     return this
                 } else if (isPointerSupported) {
@@ -432,46 +472,9 @@ declare let exports: any
                 }
                 return this
             }
-            handleIOS9ForceTouch(_forceValue: any) {
-                const eventType = 'touchmove'
-                const {
-                    _simulatedCallback,
-                    _isIOS9RealTouchDevices,
-                    _callback,
-                    el
-                } = this
-                if (!_isIOS9RealTouchDevices || !_simulatedCallback) {
-                    return this
-                }
-                _forceValue.force = 0
-                _simulatedCallback.onUpdate(() => {
-                    _callback.call(this, _forceValue)
-                })
-                this.on(eventType, e => {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    let touches = getTouch(e, el)
-
-                    if (touches === null) {
-                        return false
-                    }
-
-                    let force = touches.force !== undefined ? touches.force : touches.webkitForce !== undefined ? touches.webkitForce : -1
-
-                    if (force === -1) {
-                        return false
-                    }
-
-                    _forceValue.force = force
-                    return false
-
-                })
-                return this
-            }
             handleSimulate() {
                 let {
                     _simulatedCallback,
-                    _isIOS9RealTouchDevices,
                     _eventPress,
                     _eventUp,
                     _eventLeave,
@@ -482,7 +485,7 @@ declare let exports: any
                 } = this
 
                 if (!_simulatedCallback) {
-                    _simulatedCallback = this._simulatedCallback = new Logic(forceifyID, el)
+                    _simulatedCallback = this._simulatedCallback = new Logic(forceifyID, el, this)
                 }
                 if (_simulatedCallback) {
                     _simulatedCallback.onUpdate(_callback)
@@ -497,15 +500,6 @@ declare let exports: any
                             }
                             if (e.stopPropagation) {
                                 e.stopPropagation()
-                            }
-                            if (_isTouchSimulate && !_isReal3DTouch && !_isIOS9RealTouchDevices) {
-                                let touches = getTouch(e, el)
-                                if (touches) {
-                                    if (touches.force !== undefined || touches.webkitForce !== undefined) {
-                                        this._isIOS9RealTouchDevices = _isIOS9RealTouchDevices = true
-                                        this.handleIOS9ForceTouch(e)
-                                    }
-                                }
                             }
                             this.handlePress()
                             isPressed = this.isPressed = true
