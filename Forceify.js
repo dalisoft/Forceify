@@ -270,6 +270,8 @@
             var _this = this;
             var el = this.el;
             var isPointerSupported = 'onpointerdown' in el;
+            var __self$1 = this;
+            this._iterateOfHandleForceChange = 0;
             var tickForce;
             var perfNow;
             var currentEvent;
@@ -288,9 +290,23 @@
             };
             this.preventTouchCallout();
             if ('onwebkitmouseforcebegin' in el) {
+                var _mouseTicks_1 = 0;
                 this.on('webkitmouseforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('webkitmouseforcechanged', function (e) { return _this.handleForceChange(e); });
-                this.on(isPointerSupported ? 'pointerup' : 'mouseup', function (e) {
+                this.on('mousedown', function checkForceTouch(e) {
+                    _mouseTicks_1++;
+                    if (_mouseTicks_1 > 0 && __self$1._iterateOfHandleForceChange === 0) {
+                        __self$1._eventPress = 'mousedown';
+                        __self$1._eventLeave = 'mouseup';
+                        __self$1._eventUp = 'mouseleave';
+                        __self$1._checkResult = root.chrome ? 'Chrome' : 'Desktop';
+                        __self$1.isPressed = true;
+                        __self$1.handleSimulate();
+                        __self$1.handlePress();
+                        __self$1.off('mousedown', checkForceTouch);
+                    }
+                });
+                this.on('mouseup', function (e) {
                     var force = _this.__force;
                     currentEvent = e;
                     if (force > 0) {
@@ -302,23 +318,21 @@
                 return this;
             }
             else if (_isReal3DTouch) {
-                var __self$1_1 = this;
-                this._iterateOfHandleForceChange = 0;
                 var _touchTicks_1 = 0;
                 this.on('touchforcebegin', function (e) { return _this.handleForceChange(e); });
                 this.on('touchforcechange', function (e) { return _this.handleForceChange(e); });
                 this.on('touchstart', function check3DTouch(e) {
                     _touchTicks_1++;
-                    if (_touchTicks_1 > 0 && __self$1_1._iterateOfHandleForceChange === 0) {
+                    if (_touchTicks_1 > 0 && __self$1._iterateOfHandleForceChange === 0) {
                         _isReal3DTouch = false;
-                        __self$1_1._eventPress = 'touchstart';
-                        __self$1_1._eventLeave = 'touchleave';
-                        __self$1_1._eventUp = 'touchend';
-                        __self$1_1._checkResult = root.chrome ? 'ChromeMobile' : 'Touch';
-                        __self$1_1.isPressed = true;
-                        __self$1_1.handleSimulate();
-                        __self$1_1.handlePress();
-                        __self$1_1.off('touchstart', check3DTouch);
+                        __self$1._eventPress = 'touchstart';
+                        __self$1._eventLeave = 'touchleave';
+                        __self$1._eventUp = 'touchend';
+                        __self$1._checkResult = root.chrome ? 'ChromeMobile' : 'Touch';
+                        __self$1.isPressed = true;
+                        __self$1.handleSimulate();
+                        __self$1.handlePress();
+                        __self$1.off('touchstart', check3DTouch);
                     }
                 });
                 this.on('touchend', function (e) {

@@ -334,6 +334,9 @@ declare let exports: any
                 const { el } = this
                 const isPointerSupported = 'onpointerdown' in el
 
+				const __self$1 = this
+				this._iterateOfHandleForceChange = 0
+
                 let tickForce
                 let perfNow
                 let currentEvent
@@ -353,9 +356,24 @@ declare let exports: any
                 this.preventTouchCallout()
 
                 if ('onwebkitmouseforcebegin' in el) {
+					let _mouseTicks = 0
+
                     this.on('webkitmouseforcebegin', e => this.handleForceChange(e))
                     this.on('webkitmouseforcechanged', e => this.handleForceChange(e))
-                    this.on(isPointerSupported ? 'pointerup' : 'mouseup', e => {
+					this.on('mousedown', function checkForceTouch (e) {
+						_mouseTicks++
+						if (_mouseTicks > 0 && __self$1._iterateOfHandleForceChange === 0) {
+							__self$1._eventPress = 'mousedown'
+							__self$1._eventLeave = 'mouseup'
+							__self$1._eventUp = 'mouseleave'
+							__self$1._checkResult = root.chrome ? 'Chrome' : 'Desktop'
+							__self$1.isPressed = true
+							__self$1.handleSimulate()
+							__self$1.handlePress()
+							__self$1.off('mousedown', checkForceTouch)
+						}
+					})
+                    this.on('mouseup', e => {
                         const { __force: force } = this
 
                         currentEvent = e
@@ -370,8 +388,6 @@ declare let exports: any
                     this._checkResult = 'macOSForce'
                     return this
                 } else if (_isReal3DTouch) {
-					const __self$1 = this
-					this._iterateOfHandleForceChange = 0
 					let _touchTicks = 0
 
                     this.on('touchforcebegin', e => this.handleForceChange(e))
