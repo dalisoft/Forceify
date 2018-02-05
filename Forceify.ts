@@ -226,7 +226,7 @@ declare let exports: any
                 this._pressDuration = 200
                 this._leaveDurationTolerance = 0.35
                 this._leaveDuration = this._pressDuration * this._leaveDurationTolerance
-                this._delay = 400
+                this._delay = 0
                 this._eventPress = null
                 this._eventLeave = null
                 this._eventUp = null
