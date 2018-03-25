@@ -1,10 +1,10 @@
 {
   "name": "forceify",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Simple, yet powerful touch-force level detector implementation in TS/JS",
-  "main": "js/Forceify.js",
-  "types": "js/Forceify.d.ts",
-  "cdn": "js/Forceify.js",
+  "main": "Forceify.js",
+  "types": "Forceify.d.ts",
+  "cdn": "Forceify.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
