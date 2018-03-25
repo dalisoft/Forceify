@@ -1,7 +1,7 @@
 {
   "name": "forceify",
-  "version": "0.1.1",
-  "description": "Fast, optimized and lightweight cross-device 3D-Touch handling javascript/typescript library",
+  "version": "0.1.2",
+  "description": "Simple, yet powerful touch-force level detector implementation in TS/JS",
   "main": "js/Forceify.js",
   "types": "js/Forceify.d.ts",
   "cdn": "js/Forceify.js",

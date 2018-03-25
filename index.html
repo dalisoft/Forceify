@@ -6,29 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
 	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="stylesheet" type="text/css" href="devices.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
     <div class="container">
 
             <h1>Forceify</h1>
-            <p>The fastest, smartest and cross-device 3D Touch library for JavaScript</p>
-		<div class="cd-iphone-6 cd-black centerize">
-  <div class="cd-body">
-    <div class="cd-sound"></div>
-    <div class="cd-sleep"></div>
-    <div class="cd-camera"></div>
-    <div class="cd-ear"></div>
-    <div class="cd-home"></div>
-    <div class="cd-screen">
-        <div id="forceMe"></div>
-        <p id="forceValue">Force: <span id="forceValue__level">0</span>, Deep Press:&nbsp;<span id="forceValue__deep_press">No</span></p>
-    </div>
-  </div>
-</div>
+            <p>Simple, yet powerful touch-<b>force</b> level detector implementation in TS/JS</b></p>
+			<div id="forceMe"></div>
+			<p id="forceValue">Force Level: <span id="forceValue__level">0</span>, Deep Press:&nbsp;<span id="forceValue__deep_press">No</span></p>
 
-            <p>Grab package at <a href="https://github.com/dalisoft/Forceify" target="_blank">GitHub</a> or <a href="https://npmjs.org/package/forceify" target="_blank">NPM</a> or compiled at <a href="https://unpkg.com/forceify" target="_blank">unpkg</a>, <a href="https://npmcdn.com/forceify" target="_blank">npmcdn</a> or <a href="https://cdn.jsdelivr.net/npm/forceify" target="_blank">jsDelivr</a></p>
+			<p>Grab source at <a href="https://github.com/dalisoft/Forceify" target="_blank">GitHub</a> or <a href="https://npmjs.org/package/forceify" target="_blank">NPM</a>
+				<br/>
+			Grab compiled at <a href="https://unpkg.com/forceify" target="_blank">unpkg</a>, <a href="https://npmcdn.com/forceify" target="_blank">npmcdn</a> or <a href="https://cdn.jsdelivr.net/npm/forceify" target="_blank">jsDelivr</a></p>
 
     </div>
 
@@ -72,7 +62,7 @@
 	new Forceify(forceMe).setLongPressDuration(polyfillLongPressDuration).onForce(function(ev) {
 		var force = ev.force;
 		var scale = 1 + (force * 1.5);
-		var transform = 'translate(-50%, -50%) scale(' + scale + ')';
+		var transform = 'scale(' + scale + ')';
 		var borderRadius = 100 - (90 * force);
 
 		setTransform(forceMe, transform);
@@ -90,12 +80,11 @@
 	});
 	</script>
 	<script type="text/javascript">
-	if (window.navigator.standalone) {
-		return;
+	if (!window.navigator.standalone) {
+		setTimeout(function(){
+			window.scrollTo(0, 1);
+		}, 0);
 	}
-	setTimeout(function(){
-		window.scrollTo(0, 1);
-	}, 0);
 	</script>
 </body>
 </html>

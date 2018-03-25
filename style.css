@@ -14,7 +14,8 @@ html, body {
     margin: 0;
     text-align: center;
 	background: #222;
-	text-shadow: 0 1px 0 #000;
+    text-shadow: 0 1px 0 #000;
+    overflow: hidden;
 }
 
 a {
@@ -55,30 +56,20 @@ h1 {
     font-weight: 900;
 }
 
-[class^='cd-iphone-6'] .cd-screen {
-	background-color: #333;
-}
-.cd-screen > * {
-	display: block;
-}
-
 #forceMe {
-    width: 93px;
-    height: 93px;
-    background: rgb(0, 204, 255);
+    width: 94px;
+    height: 94px;
+    margin-left: -47px;
+    margin-top: 100px;
+    margin-bottom: 100px;
+    background-color: rgb(0, 204, 255);
     opacity: 1;
     border-radius: 100%;
-    position: absolute;
-    top: 235px;
+    position: relative;
     left: 50%;
-    transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
-    -moz-transform: translate(-50%, -50%);
-    -ms-transform: translate(-50%, -50%);
 }
 
 #forceValue {
-    position: absolute;
     top: 450px;
     width: 100%;
 }
