@@ -68,6 +68,7 @@ var forceInstance = new Forceify(yourDOMNodeReference);
 ## Compatibility
 
 It's target is ES3 compatible-browsers, but it works best within following browser:
+
 | Browser    | Supported Version | Recommended Version | Best Version |
 |------------|-------------------|---------------------|--------------|
 | IE         | >9                | >10                 | >11          |
