@@ -125,10 +125,15 @@
     var _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0;
     var _isReal3DTouch = 'ontouchforcechange' in _document.body;
     var getTouch = function (e, targ, changed) {
-        var touches = changed ? e.changedTouches : e.touches;
+        var touches = changed ? e.touches : e.changedTouches;
         if (touches) {
             var i = 0;
             var maxLen = touches.length;
+            if (maxLen > 1) {
+                if (e.scale && e.scale !== 1) {
+                    return null;
+                }
+            }
             while (i < maxLen) {
                 if (!!touches[i] && touches[i].target === targ) {
                     return touches[i];
@@ -253,11 +258,16 @@
             var force = e.webkitForce !== undefined ? e.webkitForce / 3 : e.force !== undefined ? e.force : undefined;
             if (force === undefined) {
                 var touches = getTouch(e, this.el, true);
-                if (touches.force !== undefined) {
-                    force = touches.force;
+                if (!touches) {
+                    force = 0;
                 }
-                else if (touches.webkitForce) {
-                    force = touches.force;
+                else {
+                    if (touches.force !== undefined) {
+                        force = touches.force;
+                    }
+                    else if (touches.webkitForce) {
+                        force = touches.force;
+                    }
                 }
             }
             e.force = force;

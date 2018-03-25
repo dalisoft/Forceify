@@ -178,10 +178,15 @@ declare let exports: any
         let _isReal3DTouch = 'ontouchforcechange' in _document.body
 
         const getTouch = (e: any, targ: any, changed?: boolean) => {
-            let touches = changed ? e.changedTouches : e.touches
+            let touches = changed ? e.touches : e.changedTouches
             if (touches) {
                 let i = 0
                 const maxLen = touches.length
+                if (maxLen > 1) {
+                    if (e.scale && e.scale !== 1) {
+                        return null;
+                    }
+                }
                 while (i < maxLen) {
                     if (!!touches[i] && touches[i].target === targ) {
                         return touches[i]
@@ -317,10 +322,14 @@ declare let exports: any
                 if (force === undefined) {
                     let touches = getTouch(e, this.el, true)
 
-                    if (touches.force !== undefined) {
-                        force = touches.force
-                    } else if (touches.webkitForce) {
-                        force = touches.force
+                    if (!touches) {
+                        force = 0;
+                    } else {
+                        if (touches.force !== undefined) {
+                            force = touches.force
+                        } else if (touches.webkitForce) {
+                            force = touches.force
+                        }
                     }
                 }
                 e.force = force
