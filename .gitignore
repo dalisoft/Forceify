@@ -57,3 +57,7 @@ typings/
 # dotenv environment variables file
 .env
 
+# misc
+Forceify.js
+package-lock.json
+yarn-lock.json

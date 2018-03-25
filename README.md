@@ -1,6 +1,6 @@
 # Forceify
 
-Simple, yet powerful touch-*force* level detector implementation in TS/JS
+Simple, yet powerful touch-**force** level detector implementation in TS/JS
 
 ## Installing
 
@@ -57,7 +57,7 @@ var forceInstance = new Forceify(yourDOMNodeReference);
 
 ## Methods
 
-| Instance       | Type       | Description                                 |
+| Name       | Type       | Description                                 |
 |----------------|------------|---------------------------------------------|
 | `on`           | `Function` | `addEventListener` alternative              |
 | `isIOS3DTouch` | `Function` | returns support of `real 3D Touch`          |
