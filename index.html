@@ -5,7 +5,7 @@
 	<title>Forceify</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
 	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link rel="stylesheet" type="text/css" href="devices.min.css">
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
@@ -88,6 +88,14 @@
 		deepState.style.fontWeight = steppize(force, FONT_WEIGHT_STEPS);
 		deepState.textContent = (isDeepPress(force) ? 'Yes' : 'No');
 	});
+	</script>
+	<script type="text/javascript">
+	if (window.navigator.standalone) {
+		return;
+	}
+	setTimeout(function(){
+		window.scrollTo(0, 1);
+	}, 0);
 	</script>
 </body>
 </html>
