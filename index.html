@@ -21,7 +21,7 @@
     <div class="cd-home"></div>
     <div class="cd-screen">
         <div id="forceMe"></div>
-        <p id="forceValue">Force: 0, Deep Press:&nbsp;<span>No</span></p>
+        <p id="forceValue">Force: <span id="forceValue__level">0</span>, Deep Press:&nbsp;<span id="forceValue__deep_press">No</span></p>
     </div>
   </div>
 </div>
@@ -30,34 +30,6 @@
 
     </div>
 
-	<!--script>
-	// false check
-	document.body.ontouchforcechange = function () {}
-
-
-	var forceMe = document.querySelector('#forceMe');
-
-	var registerEvent = function (elem) {
-        var event;
-        if (typeof Event === 'function') {
-            event = new Event('touchforcechange');
-        }
-        else if (document.createEvent) {
-            event = document.createEvent('Event');
-            event.initEvent('touchforcechange', true, true);
-        }
-        forceMe.addEventListener('mousedown', function (_a) {
-            event.force = 1;
-            elem.dispatchEvent(event);
-        });
-        forceMe.addEventListener('mouseup', function (_a) {
-            event.force = 0.06;
-            elem.dispatchEvent(event);
-        });
-    };
-
-	registerEvent(forceMe);
-	</script-->
     <script type="text/javascript" src="Forceify.js"></script>
 	<script type="text/javascript">
 
@@ -86,21 +58,33 @@
 	}
 
 	// Node selector
-	var forceValue = document.querySelector('#forceValue');
+	var forceValueContainer = document.querySelector('#forceValue');
+	var forceValue = forceValueContainer.querySelector('#forceValue__level');
+	var deepState = forceValueContainer.querySelector('#forceValue__deep_press');
+
+	var FONT_WEIGHT_STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
+
+	var polyfillLongPressDuration = 400;
 
 	// Initialize the instance
-	new Forceify(forceMe).onForce(function(ev) {
+	new Forceify(forceMe).setLongPressDuration(polyfillLongPressDuration).onForce(function(ev) {
 		var force = ev.force;
 		var scale = 1 + (force * 1.5);
 		var transform = 'translate(-50%, -50%) scale(' + scale + ')';
+		var borderRadius = 100 - (90 * force);
 
 		setTransform(forceMe, transform);
 
 		var color = 'rgb(' + ((255 * force) | 0) + ', ' + 204 + ', ' + (255 - (255 * force) | 0) + ')';
 
 		forceMe.style.backgroundColor = color;
+		forceMe.style.borderRadius = borderRadius + '%';
 
-		forceValue.innerHTML = 'Force: ' + ((force * 10000) | 0) / 10000 + ', Deep Press:&nbsp;<span style="color:' + color + ';font-weight:' + steppize(force, [100, 200, 300, 400, 500, 600, 700, 800, 900]) + '">' + (isDeepPress(force) ? 'Yes' : 'No') + '</span>';
+		forceValue.textContent = ((force * 1000) | 0) / 1000;
+
+		deepState.style.color = color;
+		deepState.style.fontWeight = steppize(force, FONT_WEIGHT_STEPS);
+		deepState.textContent = (isDeepPress(force) ? 'Yes' : 'No');
 	});
 	</script>
 </body>

@@ -63,7 +63,6 @@ h1 {
 }
 
 #forceMe {
-    z-index: 99;
     width: 93px;
     height: 93px;
     background: rgb(0, 204, 255);
@@ -84,5 +83,6 @@ h1 {
     width: 100%;
 }
 #forceValue span {
-	color: #0cf;
+    color: #0cf;
+    position: relative;
 }
