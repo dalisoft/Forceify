@@ -1,12 +1,21 @@
 {
   "name": "forceify",
-  "version": "0.1.5",
-  "description": "Simple, yet powerful touch-force level detector implementation in TS/JS",
-  "main": "Forceify.js",
-  "types": "Forceify.d.ts",
-  "cdn": "Forceify.js",
+  "version": "0.2.0",
+  "description": "Simple, yet powerful touch-force level detector implementation in JS",
+  "main": "forceify.umd.js",
+  "module": "forceify.es.js",
+  "browser": "forceify.umd.min.js",
+  "cdn": "forceify.umd.min.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublishOnly": "rollup -c && yarn minify",
+    "dev": "rollup -c -w",
+    "minify": "rollup -c && uglifyjs forceify.umd.js -c -m -o forceify.umd.min.js"
+  },
+  "standard": {
+    "ignore": [
+      "forceify.umd.js",
+      "forceify.umd.min.js"
+    ]
   },
   "keywords": [
     "3d",
@@ -29,5 +38,13 @@
     "iphone"
   ],
   "author": "dalisoft",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.46",
+    "@babel/preset-es2015": "^7.0.0-beta.46",
+    "@babel/preset-stage-0": "^7.0.0-beta.46",
+    "rollup": "^0.58.2",
+    "rollup-plugin-babel": "^4.0.0-beta.4",
+    "uglify-js": "^3.3.23"
+  }
 }

@@ -15,7 +15,7 @@ html, body {
     text-align: center;
 	background: #222;
     text-shadow: 0 1px 0 #000;
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 a {

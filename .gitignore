@@ -58,6 +58,7 @@ typings/
 .env
 
 # misc
-Forceify.js
+forceify.umd.js
+forceify.umd.min.js
 package-lock.json
-yarn-lock.json
+.npmignore

@@ -1,6 +1,6 @@
 # Forceify
 
-Simple, yet powerful touch-**force** level detector implementation in TS/JS
+Simple, yet powerful touch-**force** level detector implementation in JS
 
 ## Installing
 
