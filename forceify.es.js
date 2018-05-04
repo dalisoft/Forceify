@@ -297,30 +297,43 @@
     		};
     		this.preventTouchCallout();
     		if ('onwebkitmouseforcebegin' in el) {
-    			let _mouseTicks = 0;
-    			this.on('webkitmouseforcebegin', this.handleForceChange);
-    			this.on('webkitmouseforcechanged', this.handleForceChange);
-    			this.on('mousedown', function checkForceTouch(e) {
-    				_mouseTicks++;
-    				if (_mouseTicks > 0 && __self$1._iterateOfHandleForceChange === 0) {
-    					__self$1._eventPress = 'mousedown';
-    					__self$1._eventLeave = 'mouseup';
-    					__self$1._eventUp = 'mouseleave';
-    					__self$1._checkResult = root.chrome ? 'Chrome' : 'Desktop';
-    					__self$1.isPressed = true;
-    					__self$1.handleSimulate();
-    					__self$1.handlePress();
-    					__self$1.off('mousedown', checkForceTouch);
-    				}
+    			let _touchTicks = 0;
+    			let tick;
+    			this.on('onwebkitmouseforcechange', this.handleForceChange);
+    			this.on('onwebkitmouseforcebegin', function checkForceTouch(e) {
+    				_touchTicks++;
+    				clearTimeout(tick);
+    				tick = setTimeout(() => {
+    					__self$1.off('onwebkitmouseforcebegin', checkForceTouch);
+    				}, 25);
     			});
-    			this.on('mouseup', e => {
+    			this.on('mousedown', function checkForceTouchVerify(e) {
+    				clearTimeout(tick);
+    				tick = setTimeout(function checkVerify() {
+    					if (_touchTicks === 0 && __self$1._iterateOfHandleForceChange === 0) {
+    						_isReal3DTouch = false;
+    						__self$1._eventPress = 'mousedown';
+    						__self$1._eventLeave = 'mouseleave';
+    						__self$1._eventUp = 'mouseup';
+    						__self$1._checkResult = root.chrome ? 'macOS Chrome' : 'macOS Safari';
+    						__self$1.isPressed = true;
+    						__self$1.handleSimulate();
+    						__self$1.handlePress();
+    					}
+    					__self$1.off('mousedown', checkForceTouchVerify);
+    				}, 50);
+    			});
+    			this.on('mouseup', function onMousUp(e) {
     				const {
-    					__force: force
-    				} = this;
+						__force: force,
+						_iterateOfHandleForceChange
+    				} = __self$1;
     				currentEvent = e;
-    				if (force > 0) {
+    				if (force > 0 && _iterateOfHandleForceChange > 1) {
     					perfNow = performance.now();
     					tickForce = reqAnimFrame(renderUntilBecomeZero);
+    				} else {
+    					__self$1.off('mouseup', onMousUp);
     				}
     			});
     			this._checkResult = 'macOSForce';
@@ -333,13 +346,11 @@
     				_touchTicks++;
     				clearTimeout(tick);
     				tick = setTimeout(() => {
-    					console.log('Calling force-begin');
     					__self$1.off('touchforcebegin', check3DTouch);
     				}, 25);
     			});
     			this.on('touchstart', function check3DTouchVerify(e) {
     				clearTimeout(tick);
-    				console.log('Call touch-start');
     				tick = setTimeout(function checkVerify() {
     					if (_touchTicks === 0 && __self$1._iterateOfHandleForceChange === 0) {
     						_isReal3DTouch = false;
@@ -350,17 +361,17 @@
     						__self$1.isPressed = true;
     						__self$1.handleSimulate();
     						__self$1.handlePress();
-    						console.log('Using fallback :(');
     					}
     					__self$1.off('touchstart', check3DTouchVerify);
     				}, 50);
     			});
     			this.on('touchend', function onTouchEnd(e) {
     				const {
-    					__force: force
+						__force: force,
+						_iterateOfHandleForceChange
     				} = __self$1;
     				currentEvent = e;
-    				if (force > 0 && _touchTicks > 1) {
+    				if (force > 0 && _iterateOfHandleForceChange > 1) {
     					perfNow = performance.now();
     					tickForce = reqAnimFrame(renderUntilBecomeZero);
     				} else {
