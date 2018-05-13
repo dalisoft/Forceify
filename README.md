@@ -32,20 +32,9 @@ When device doesn't support native 3D-Touch, it's handles it via `delayed call` 
 It's browser-only mode, so please use it carefully and don't use with NodeJS server-side apps.
 You should load script first for working snippet...
 
-### In React/Preact/Inferno
+### In React
 
-```javascript
-class MyApp extends Component {
-    componentDidMount () {
-        new Forceify(this.refs.lorem01).onForce(({force}) => {
-            console.log(force);
-        });
-    }
-    render () { <Lorem ref="lorem01" {...}    ><Ipsum/><Dolor/></Lorem> }
-}
-
-render(<MyApp/>, myMountTarget);
-```
+For React apps, please use [React wrapper for Forceify](https://www.npmjs.com/package/react-forceify)
 
 ```javascript
 var forceInstance = new Forceify(yourDOMNodeReference);
