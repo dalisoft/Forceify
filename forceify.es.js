@@ -22,7 +22,13 @@
     			tasks.splice(i, 1);
     		}
     	}
-    });
+	});
+	const _default = (value, def) => {
+		if (value === null || value === undefined) {
+			return def;
+		}
+		return value;
+	}
     let _id = 0;
     class Logic {
     	constructor(queueID, elem, self) {
@@ -152,7 +158,7 @@
     	return null;
     };
     export default class Forceify {
-    	constructor(el) {
+    	constructor(el, params = {}) {
     		let forceifyID = 0;
     		if (!el.forceifyQueueId) {
     			forceifyID = el.forceifyQueueId = Math.floor(Date.now() + (Math.random() * 1000));
@@ -162,16 +168,16 @@
     		this.id = forceifyID;
     		this._callback = null;
     		this.el = el;
-    		this._pressDuration = 200;
-    		this._leaveDurationTolerance = 0.35;
+    		this._pressDuration = _default(params.pressDuration, 200);
+    		this._leaveDurationTolerance = _default(params.leaveDurationTolerance, 0.35);
     		this._leaveDuration = this._pressDuration * this._leaveDurationTolerance;
-    		this._delay = 0;
+    		this._delay = _default(params.delay, 0);
     		this._eventPress = null;
     		this._eventLeave = null;
     		this._eventUp = null;
     		this._checkResult = null;
-    		this._useSameDurInLeave = false;
-    		this._resetOnLeave = true;
+    		this._useSameDurInLeave = _default(params.useSameDurInLeave, false);
+    		this._resetOnLeave = _default(params.resetOnLeave, true);
     		this.el = el;
     		return this;
     	}

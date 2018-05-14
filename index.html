@@ -56,10 +56,8 @@
 
 	var FONT_WEIGHT_STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
-	var polyfillLongPressDuration = 400;
-
 	// Initialize the instance
-	new Forceify(forceMe).setLongPressDuration(polyfillLongPressDuration).onForce(function(ev) {
+	new Forceify(forceMe, {pressDuration: 400}).onForce(function(ev) {
 		var force = ev.force;
 		var scale = 1 + (force * 1.5);
 		var transform = 'scale(' + scale + ')';
