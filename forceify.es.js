@@ -133,8 +133,8 @@
     let _isIOSDevices = ua.indexOf('; CPU') !== -1 && ua.indexOf(' like Mac') !== -1;
     let _isNonBrowserEnv = 'tabris' in root || 'tezNative' in root;
     let _document = _isNonBrowserEnv || !root.document ? {} : root.document;
-    let _isTouchSimulate = 'ontouchend' in _document.body || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0;
-    let _isReal3DTouch = 'ontouchforcechange' in _document.body && _isIOSDevices;
+    let _isTouchSimulate = (_document.body && 'ontouchend' in _document.body) || root.DocumentTouch || navigator.maxTouchPoints > 0 || root.navigator.msMaxTouchPoints > 0;
+    let _isReal3DTouch = (_document.body && 'ontouchforcechange' in _document.body) && _isIOSDevices;
     const getTouch = (e, targ, changed) => {
     	let touches = changed ? e.touches : e.changedTouches;
     	if (touches) {

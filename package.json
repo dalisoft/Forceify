@@ -1,6 +1,6 @@
 {
   "name": "forceify",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Simple, yet powerful touch-force level detector",
   "main": "forceify.umd.js",
   "module": "forceify.es.js",
