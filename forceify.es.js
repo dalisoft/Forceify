@@ -136,8 +136,7 @@
 	}
     let ua = navig.userAgent;
     let _isIOSDevices = ua.indexOf('; CPU') !== -1 && ua.indexOf(' like Mac') !== -1;
-    let _isNonBrowserEnv = 'tabris' in root || 'tezNative' in root;
-    let _document = _isNonBrowserEnv || !root.document ? {} : root.document;
+    let _document = !root.document ? {} : root.document;
     let _isTouchSimulate = (_document.body && 'ontouchend' in _document.body) || root.DocumentTouch || navig.maxTouchPoints > 0 || navig.msMaxTouchPoints > 0;
     let _isReal3DTouch = (_document.body && 'ontouchforcechange' in _document.body) && _isIOSDevices;
     const getTouch = (e, targ, changed) => {
@@ -217,9 +216,7 @@
     		return this.init();
     	}
     	on = (eventName, callbackListener, capture) => {
-    		if (_isNonBrowserEnv) {
-    			this.el.on(eventName, callbackListener);
-    		} else if (root.addEventListener) {
+    		if (root.addEventListener) {
     			this.el.addEventListener(eventName, callbackListener, capture);
     		} else if (root.attachEvent) {
     			this.el.attachEvent('on' + eventName, callbackListener);
@@ -229,9 +226,7 @@
     		return this;
     	}
     	off = (eventName, callbackListener, capture) => {
-    		if (_isNonBrowserEnv) {
-    			this.el.off(eventName, callbackListener);
-    		} else if (root.removeEventListener) {
+    		if (root.removeEventListener) {
     			this.el.removeEventListener(eventName, callbackListener, capture);
     		} else if (root.detachEvent) {
     			this.el.detachEvent('on' + eventName, callbackListener);
