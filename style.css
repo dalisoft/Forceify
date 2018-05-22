@@ -15,7 +15,7 @@ html, body {
     text-align: center;
 	background: #222;
     text-shadow: 0 1px 0 #000;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 a {
@@ -76,4 +76,9 @@ h1 {
 #forceValue span {
     color: #0cf;
     position: relative;
+}
+#forceValue__level, #forceValue__deep_press {
+    width: 30px;
+    box-sizing: border-box;
+    display: inline-block;
 }

@@ -22,7 +22,7 @@
 
     </div>
 
-    <script type="text/javascript" src="https://unpkg.com/forceify"></script>
+    <script type="text/javascript" src="forceify.umd.js"></script>
 	<script type="text/javascript">
 
 	// Helpers function
@@ -36,7 +36,7 @@
 
 	// Returns state of deep-press (aka Force Click)
 	var isDeepPress = function (force) {
-		return force > ( 1 / 3 );
+		return force > ( 2 / 3 );
 	}
 
 	// Check if there CSS3 3D-mode available?
@@ -70,7 +70,7 @@
 		forceMe.style.backgroundColor = color;
 		forceMe.style.borderRadius = borderRadius + '%';
 
-		forceValue.textContent = ((force * 1000) | 0) / 1000;
+		forceValue.textContent = ((force * 100) | 0) / 100;
 
 		deepState.style.color = color;
 		deepState.style.fontWeight = steppize(force, FONT_WEIGHT_STEPS);

@@ -183,7 +183,8 @@
     		this._checkResult = null;
     		this._useSameDurInLeave = _default(params.useSameDurInLeave, false);
     		this._resetOnLeave = _default(params.resetOnLeave, true);
-    		this.el = el;
+			this.el = el;
+			this.polyfill = _default(params.polyfill, true);
     		return this;
     	}
     	getEnv = () => {
@@ -284,7 +285,8 @@
     	}
     	init = () => {
     		const {
-    			el
+				el,
+				polyfill
     		} = this;
     		const isPointerSupported = 'onpointerdown' in el;
     		const __self$1 = this;
@@ -321,7 +323,7 @@
     			this.on('mousedown', function checkForceTouchVerify(e) {
     				clearTimeout(tick);
     				tick = setTimeout(function checkVerify() {
-    					if (_touchTicks === 0 && __self$1._iterateOfHandleForceChange === 0) {
+    					if (_touchTicks === 0 && __self$1._iterateOfHandleForceChange === 0 && polyfill) {
     						_isReal3DTouch = false;
     						__self$1._eventPress = 'mousedown';
     						__self$1._eventLeave = 'mouseleave';
@@ -363,7 +365,7 @@
     			this.on('touchstart', function check3DTouchVerify(e) {
     				clearTimeout(tick);
     				tick = setTimeout(function checkVerify() {
-    					if (_touchTicks === 0 && __self$1._iterateOfHandleForceChange === 0) {
+    					if (_touchTicks === 0 && __self$1._iterateOfHandleForceChange === 0 && polyfill) {
     						_isReal3DTouch = false;
     						__self$1._eventPress = 'touchstart';
     						__self$1._eventLeave = 'touchleave';
@@ -391,22 +393,22 @@
     			});
     			this._checkResult = 'iOSForce';
     			return this;
-    		} else if (isPointerSupported) {
+    		} else if (polyfill && isPointerSupported) {
     			this._eventPress = 'pointerdown';
     			this._eventLeave = 'pointerleave';
     			this._eventUp = 'pointerup';
     			this._checkResult = root.chrome ? 'Chrome' : 'Modern';
-    		} else if ('onmspointerdown' in el) {
+    		} else if (polyfill && 'onmspointerdown' in el) {
     			this._eventPress = 'mspointerdown';
     			this._eventLeave = 'mspointerleave';
     			this._eventUp = 'mspointerup';
     			this._checkResult = root.chrome ? 'Chrome' : 'Modern';
-    		} else if (_isTouchSimulate) {
+    		} else if (polyfill && _isTouchSimulate) {
     			this._eventPress = 'touchstart';
     			this._eventLeave = 'touchleave';
     			this._eventUp = 'touchend';
     			this._checkResult = root.chrome ? 'ChromeMobile' : 'Touch';
-    		} else if ('onmousedown' in el) {
+    		} else if (polyfill && 'onmousedown' in el) {
     			this._eventPress = 'mousedown';
     			this._eventLeave = 'mouseup';
     			this._eventUp = 'mouseleave';
