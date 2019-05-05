@@ -260,13 +260,21 @@
     }
     on (eventName, callbackListener, capture) {
       if (root.addEventListener) {
-        this.el.addEventListener(eventName, callbackListener, capture)
+        this.el.addEventListener(
+          eventName,
+          callbackListener,
+          capture
+        )
       }
       return this
     }
     off (eventName, callbackListener, capture) {
       if (root.removeEventListener) {
-        this.el.removeEventListener(eventName, callbackListener, capture)
+        this.el.removeEventListener(
+          eventName,
+          callbackListener,
+          capture
+        )
       }
       return this
     }
@@ -331,6 +339,12 @@
           }
         }
       }
+      const { type } = e
+
+      if (force > 0 && force < 1 && !this.really3DTouchDevice && (type === 'touchforcechange' || type === 'webkitmouseforcechanged')) {
+        this.really3DTouchDevice = true
+      }
+
       e.force = force
       this.__force = force
       this._calledTimeout = true
@@ -345,6 +359,12 @@
       let tickForce
       let perfNow
       let currentEvent
+      let touchStartTick
+      let touchEndTick
+
+      // Rebind to self
+      this.handleForceChange = this.handleForceChange.bind(this)
+
       const renderUntilBecomeZero = time => {
         const { __force } = this
         let force =
@@ -359,15 +379,17 @@
         this.handleForceChange(currentEvent)
       }
       this.preventTouchCallout()
-      if ('onwebkitmouseforcebegin' in el) {
-        this.on('onwebkitmouseforcechange', this.handleForceChange.bind(this))
-        this.on('onwebkitmouseforcebegin', function checkForceTouch (e) {
+      if ('webkitmouseforcewillbegin' in el) {
+        const checkForceTouch = (e) => {
           this._touchTicks++
           clearTimeout(this.tick)
           this.tick = setTimeout(() => {
-            __self$1.off('onwebkitmouseforcebegin', checkForceTouch)
+            this.off('webkitmouseforcewillbegin', checkForceTouch)
           }, 25)
-        })
+        }
+
+        this.on('webkitmouseforcechanged', this.handleForceChange)
+        this.on('webkitmouseforcewillbegin', checkForceTouch)
         this.on('mousedown', function checkForceTouchVerify (e) {
           clearTimeout(this.tick)
           this.tick = setTimeout(function checkVerify () {
@@ -403,44 +425,78 @@
         this._checkResult = 'macOSForce'
         return this
       } else if (_isReal3DTouch) {
-        this.on('touchforcechange', this.handleForceChange.bind(this))
-        this.on('touchforcebegin', function check3DTouch () {
+        const check3DTouch = () => {
           this._touchTicks++
           clearTimeout(this.tick)
           this.tick = setTimeout(() => {
-            __self$1.off('touchforcebegin', check3DTouch)
-          }, 25)
-        })
-        this.on('touchstart', function check3DTouchVerify (e) {
-          clearTimeout(this.tick)
-          this.tick = setTimeout(function checkVerify () {
-            if (
-              this._touchTicks === 0 &&
-              __self$1._iterateOfHandleForceChange === 0 &&
-              polyfill
-            ) {
-              _isReal3DTouch = false
-              __self$1._eventPress = 'touchstart'
-              __self$1._eventLeave = 'touchleave'
-              __self$1._eventUp = 'touchend'
-              __self$1._checkResult = root.chrome ? 'ChromeMobile' : 'Touch'
-              __self$1.isPressed = true
-              __self$1.handleSimulate()
-              __self$1.handlePress()
+            if (this._touchTicks > 3 && !this.really3DTouchDevice) {
+              this.really3DTouchDevice = true
+              this.off('touchforcebegin', check3DTouch)
             }
-            __self$1.off('touchstart', check3DTouchVerify)
+          }, 25)
+        }
+        let verify3DTouch = () => {
+          clearTimeout(touchStartTick)
+          touchStartTick = setTimeout(() => {
+            if (this.really3DTouchDevice) {
+              clearTimeout(touchStartTick)
+              this.off('touchstart', verify3DTouch)
+            } else {
+              clearTimeout(this.tick)
+              this.tick = setTimeout(
+                () => {
+                  if (
+                    this._touchTicks === 0 &&
+                    polyfill
+                  ) {
+                    _isReal3DTouch = false
+                    this._eventPress = 'touchstart'
+                    this._eventLeave = 'touchleave'
+                    this._eventUp = 'touchend'
+                    this._checkResult = root.chrome
+                      ? 'ChromeMobile'
+                      : 'Touch'
+                    this.isPressed = true
+                    this.handleSimulate()
+                    this.handlePress()
+                  }
+                  this.off('touchstart', verify3DTouch)
+                },
+                50
+              )
+            }
           }, 50)
-        })
-        this.on('touchend', function onTouchEnd (e) {
-          const { __force: force, _iterateOfHandleForceChange } = __self$1
-          currentEvent = e
-          if (force > 0 && _iterateOfHandleForceChange > 1) {
-            perfNow = performance.now()
-            tickForce = reqAnimFrame(renderUntilBecomeZero)
-          } else {
-            __self$1.off('touchend', onTouchEnd)
-          }
-        })
+        }
+        const onTouchEnd = (e) => {
+          clearTimeout(touchEndTick)
+          touchEndTick = setTimeout(
+            () => {
+              if (this.really3DTouchDevice) {
+                clearTimeout(touchStartTick)
+                this.off('touchend', onTouchEnd)
+              } else {
+                const {
+                  __force: force,
+                  _iterateOfHandleForceChange
+                } = this
+                currentEvent = e
+                if (force > 0 && _iterateOfHandleForceChange > 1) {
+                  perfNow = performance.now()
+                  tickForce = reqAnimFrame(renderUntilBecomeZero)
+                } else {
+                  this.off('touchend', onTouchEnd)
+                }
+              }
+            },
+            touchStartTick ? 0 : 50
+          )
+        }
+
+        this.on('touchforcebegin', check3DTouch)
+        this.on('touchforcechange', this.handleForceChange)
+
+        this.on('touchstart', verify3DTouch)
+        this.on('touchend', onTouchEnd)
         this._checkResult = 'iOSForce'
         return this
       } else if (polyfill && isPointerSupported) {
@@ -483,8 +539,8 @@
       return this
     }
     handlePress () {
-      let { _simulatedCallback, _pressDuration, _delay } = this
-      if (_simulatedCallback) {
+      let { _simulatedCallback, _pressDuration, _delay, really3DTouchDevice } = this
+      if (_simulatedCallback && !really3DTouchDevice) {
         _simulatedCallback
           .duration(_pressDuration)
           .delay(_delay)
@@ -513,8 +569,12 @@
       if (_simulatedCallback) {
         _simulatedCallback.onUpdate(_callback)
       }
-      // LONG PRESS
-      this.on(_eventPress, e => {
+
+      const pressListener = e => {
+        if (this.really3DTouchDevice) {
+          this.off(_eventPress, pressListener)
+          return
+        }
         if (!isPressed && !_isReal3DTouch) {
           if (e.type === _eventPress) {
             if (e.preventDefault) {
@@ -528,9 +588,16 @@
           }
         }
         return false
-      })
+      }
+      // LONG PRESS
+      this.on(_eventPress, pressListener)
       // LEAVE
       const leaveListener = e => {
+        if (this.really3DTouchDevice) {
+          this.off(_eventUp, leaveListener)
+          this.off(_eventLeave, leaveListener)
+          return
+        }
         if (isPressed) {
           if (
             e.type === _eventUp ||

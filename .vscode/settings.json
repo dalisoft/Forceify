@@ -1,3 +1,10 @@
 {
-  "prettier.requireConfig": true
+  "eslint.enable": false,
+  "prettier.requireConfig": true,
+  "tslint.jsEnable": false,
+  "tslint.exclude": "*.js",
+  "javascript.format.enable": false,
+  "files.associations": {
+    "*.js": "javascript"
+  }
 }
