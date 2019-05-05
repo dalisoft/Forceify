@@ -1,17 +1,17 @@
 {
   "name": "forceify",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "Simple, yet powerful touch-force handler",
   "main": "forceify.umd.js",
   "browser": "forceify.umd.min.js",
   "cdn": "forceify.umd.min.js",
   "scripts": {
-    "prepublishOnly": "npm run minify",
+    "prepublishOnly": "npm run lint && npm run minify",
+    "lint": "npx standard --fix",
     "minify": "npx terser forceify.umd.js -c -m -o forceify.umd.min.js"
   },
   "standard": {
     "ignore": [
-      "forceify.umd.js",
       "forceify.umd.min.js"
     ]
   },
@@ -38,6 +38,7 @@
   "author": "dalisoft",
   "license": "MIT",
   "devDependencies": {
+    "standard": "^12.0.1",
     "terser": "^3.17.0"
   }
 }
