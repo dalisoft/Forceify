@@ -260,21 +260,13 @@
     }
     on (eventName, callbackListener, capture) {
       if (root.addEventListener) {
-        this.el.addEventListener(
-          eventName,
-          callbackListener,
-          capture
-        )
+        this.el.addEventListener(eventName, callbackListener, capture)
       }
       return this
     }
     off (eventName, callbackListener, capture) {
       if (root.removeEventListener) {
-        this.el.removeEventListener(
-          eventName,
-          callbackListener,
-          capture
-        )
+        this.el.removeEventListener(eventName, callbackListener, capture)
       }
       return this
     }
@@ -341,8 +333,13 @@
       }
       const { type } = e
 
-      if (force > 0 && force < 1 && !this.really3DTouchDevice && (type === 'touchforcechange' || type === 'webkitmouseforcechanged')) {
-        this.really3DTouchDevice = true
+      if (
+        force > 0 &&
+        force < 1 &&
+        !this.nativeAPIExists &&
+        (type === 'touchforcechange' || type === 'webkitmouseforcechanged')
+      ) {
+        this.nativeAPIExists = true
       }
 
       e.force = force
@@ -359,8 +356,6 @@
       let tickForce
       let perfNow
       let currentEvent
-      let touchStartTick
-      let touchEndTick
 
       // Rebind to self
       this.handleForceChange = this.handleForceChange.bind(this)
@@ -379,25 +374,13 @@
         this.handleForceChange(currentEvent)
       }
       this.preventTouchCallout()
-      if ('webkitmouseforcewillbegin' in el) {
-        const checkForceTouch = (e) => {
-          this._touchTicks++
-          clearTimeout(this.tick)
-          this.tick = setTimeout(() => {
-            this.off('webkitmouseforcewillbegin', checkForceTouch)
-          }, 25)
-        }
-
+      if (!_isReal3DTouch && 'onwebkitmouseforcechanged' in el) {
         this.on('webkitmouseforcechanged', this.handleForceChange)
-        this.on('webkitmouseforcewillbegin', checkForceTouch)
-        this.on('mousedown', function checkForceTouchVerify (e) {
-          clearTimeout(this.tick)
-          this.tick = setTimeout(function checkVerify () {
-            if (
-              this._touchTicks === 0 &&
-              __self$1._iterateOfHandleForceChange === 0 &&
-              polyfill
-            ) {
+        this.on('mousedown', function checkForceTouchVerify () {
+          if (__self$1.nativeAPIExists) {
+            __self$1.off('mousedown', checkForceTouchVerify)
+          } else {
+            if (__self$1._touchTicks === 0 && polyfill) {
               _isReal3DTouch = false
               __self$1._eventPress = 'mousedown'
               __self$1._eventLeave = 'mouseleave'
@@ -410,89 +393,57 @@
               __self$1.handlePress()
             }
             __self$1.off('mousedown', checkForceTouchVerify)
-          }, 50)
+          }
         })
         this.on('mouseup', function onMousUp (e) {
-          const { __force: force, _iterateOfHandleForceChange } = __self$1
-          currentEvent = e
-          if (force > 0 && _iterateOfHandleForceChange > 1) {
-            perfNow = performance.now()
-            tickForce = reqAnimFrame(renderUntilBecomeZero)
-          } else {
+          if (__self$1.nativeAPIExists) {
             __self$1.off('mouseup', onMousUp)
+          } else {
+            const { __force: force, _iterateOfHandleForceChange } = __self$1
+            currentEvent = e
+            if (force > 0 && _iterateOfHandleForceChange > 1) {
+              perfNow = performance.now()
+              tickForce = reqAnimFrame(renderUntilBecomeZero)
+            } else {
+              __self$1.off('mouseup', onMousUp)
+            }
           }
         })
         this._checkResult = 'macOSForce'
         return this
       } else if (_isReal3DTouch) {
-        const check3DTouch = () => {
-          this._touchTicks++
-          clearTimeout(this.tick)
-          this.tick = setTimeout(() => {
-            if (this._touchTicks > 3 && !this.really3DTouchDevice) {
-              this.really3DTouchDevice = true
-              this.off('touchforcebegin', check3DTouch)
-            }
-          }, 25)
-        }
         let verify3DTouch = () => {
-          clearTimeout(touchStartTick)
-          touchStartTick = setTimeout(() => {
-            if (this.really3DTouchDevice) {
-              clearTimeout(touchStartTick)
-              this.off('touchstart', verify3DTouch)
-            } else {
-              clearTimeout(this.tick)
-              this.tick = setTimeout(
-                () => {
-                  if (
-                    this._touchTicks === 0 &&
-                    polyfill
-                  ) {
-                    _isReal3DTouch = false
-                    this._eventPress = 'touchstart'
-                    this._eventLeave = 'touchleave'
-                    this._eventUp = 'touchend'
-                    this._checkResult = root.chrome
-                      ? 'ChromeMobile'
-                      : 'Touch'
-                    this.isPressed = true
-                    this.handleSimulate()
-                    this.handlePress()
-                  }
-                  this.off('touchstart', verify3DTouch)
-                },
-                50
-              )
+          if (this.nativeAPIExists) {
+            this.off('touchstart', verify3DTouch)
+          } else {
+            if (this._touchTicks === 0 && polyfill) {
+              _isReal3DTouch = false
+              this._eventPress = 'touchstart'
+              this._eventLeave = 'touchleave'
+              this._eventUp = 'touchend'
+              this._checkResult = root.chrome ? 'ChromeMobile' : 'Touch'
+              this.isPressed = true
+              this.handleSimulate()
+              this.handlePress()
             }
-          }, 50)
+            this.off('touchstart', verify3DTouch)
+          }
         }
-        const onTouchEnd = (e) => {
-          clearTimeout(touchEndTick)
-          touchEndTick = setTimeout(
-            () => {
-              if (this.really3DTouchDevice) {
-                clearTimeout(touchStartTick)
-                this.off('touchend', onTouchEnd)
-              } else {
-                const {
-                  __force: force,
-                  _iterateOfHandleForceChange
-                } = this
-                currentEvent = e
-                if (force > 0 && _iterateOfHandleForceChange > 1) {
-                  perfNow = performance.now()
-                  tickForce = reqAnimFrame(renderUntilBecomeZero)
-                } else {
-                  this.off('touchend', onTouchEnd)
-                }
-              }
-            },
-            touchStartTick ? 0 : 50
-          )
+        const onTouchEnd = e => {
+          if (this.nativeAPIExists) {
+            this.off('touchend', onTouchEnd)
+          } else {
+            const { __force: force, _iterateOfHandleForceChange } = this
+            currentEvent = e
+            if (force > 0 && _iterateOfHandleForceChange > 1) {
+              perfNow = performance.now()
+              tickForce = reqAnimFrame(renderUntilBecomeZero)
+            } else {
+              this.off('touchend', onTouchEnd)
+            }
+          }
         }
 
-        this.on('touchforcebegin', check3DTouch)
         this.on('touchforcechange', this.handleForceChange)
 
         this.on('touchstart', verify3DTouch)
@@ -539,8 +490,13 @@
       return this
     }
     handlePress () {
-      let { _simulatedCallback, _pressDuration, _delay, really3DTouchDevice } = this
-      if (_simulatedCallback && !really3DTouchDevice) {
+      let {
+        _simulatedCallback,
+        _pressDuration,
+        _delay,
+        nativeAPIExists
+      } = this
+      if (_simulatedCallback && !nativeAPIExists) {
         _simulatedCallback
           .duration(_pressDuration)
           .delay(_delay)
@@ -571,7 +527,7 @@
       }
 
       const pressListener = e => {
-        if (this.really3DTouchDevice) {
+        if (this.nativeAPIExists) {
           this.off(_eventPress, pressListener)
           return
         }
@@ -593,7 +549,7 @@
       this.on(_eventPress, pressListener)
       // LEAVE
       const leaveListener = e => {
-        if (this.really3DTouchDevice) {
+        if (this.nativeAPIExists) {
           this.off(_eventUp, leaveListener)
           this.off(_eventLeave, leaveListener)
           return
