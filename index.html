@@ -37,6 +37,15 @@
       </p>
     </div>
 
+	<script>
+	// Disable Zoom on mobile Safari starting at iOS 10
+	document.addEventListener('touchmove', function(event) {
+        event = event.originalEvent || event;
+        if (event.scale !== 1) {
+           event.preventDefault();
+        }
+	}, false);
+	</script>
     <script type="text/javascript" src="forceify.umd.js"></script>
     <script type="text/javascript">
       // Helpers function
