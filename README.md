@@ -1,6 +1,6 @@
 # Forceify
 
-Simple, yet powerful touch-**force** level detector
+Simple, yet powerful touch-**force** handler
 
 ## Installing
 
@@ -38,16 +38,16 @@ For React apps, please use [React wrapper for Forceify](https://www.npmjs.com/pa
 
 ```javascript
 var forceInstance = new Forceify(yourDOMNodeReference);
-    forceInstance.onForce(function(e){
-        var force = e.force;
-        console.log(force);
-    });
+forceInstance.onForce(function(e) {
+  var force = e.force;
+  console.log(force);
+});
 ```
 
 ## Methods
 
-| Name       | Type       | Description                                 |
-|----------------|------------|---------------------------------------------|
+| Name           | Type       | Description                                 |
+| -------------- | ---------- | ------------------------------------------- |
 | `on`           | `Function` | `addEventListener` alternative              |
 | `isIOS3DTouch` | `Function` | returns support of `real 3D Touch`          |
 | `isChrome`     | `Function` | returns `true` if `Chrome` browser/OS       |
@@ -59,7 +59,7 @@ var forceInstance = new Forceify(yourDOMNodeReference);
 It's target is ES3 compatible-browsers, but it works best within following browser:
 
 | Browser    | Supported Version | Recommended Version | Best Version |
-|------------|-------------------|---------------------|--------------|
+| ---------- | ----------------- | ------------------- | ------------ |
 | IE         | >9                | >10                 | >11          |
 | Android    | >4.1.2            | >4.4                | >5.1         |
 | iOS        | >7                | >9                  | >10          |

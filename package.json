@@ -1,15 +1,13 @@
 {
   "name": "forceify",
-  "version": "0.2.8",
-  "description": "Simple, yet powerful touch-force level detector",
+  "version": "0.2.9",
+  "description": "Simple, yet powerful touch-force handler",
   "main": "forceify.umd.js",
-  "module": "forceify.es.js",
   "browser": "forceify.umd.min.js",
   "cdn": "forceify.umd.min.js",
   "scripts": {
-    "prepublishOnly": "rollup -c && yarn minify",
-    "dev": "rollup -c -w",
-    "minify": "rollup -c && uglifyjs forceify.umd.js -c -m -o forceify.umd.min.js"
+    "prepublishOnly": "npm run minify",
+    "minify": "npx terser forceify.umd.js -c -m -o forceify.umd.min.js"
   },
   "standard": {
     "ignore": [
@@ -40,11 +38,6 @@
   "author": "dalisoft",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.0.0-beta.46",
-    "@babel/preset-es2015": "^7.0.0-beta.46",
-    "@babel/preset-stage-0": "^7.0.0-beta.46",
-    "rollup": "^0.58.2",
-    "rollup-plugin-babel": "^4.0.0-beta.4",
-    "uglify-js": "^3.3.23"
+    "terser": "^3.17.0"
   }
 }

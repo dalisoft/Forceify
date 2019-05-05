@@ -1,88 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-	<title>Forceify</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimal-ui">
-	<meta name="apple-mobile-web-app-capable" content="yes" />
-	<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <link rel="stylesheet" type="text/css" href="style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Forceify</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+  <body>
     <div class="container">
+      <h1>Forceify</h1>
+      <p>Simple, yet powerful touch-<b>force</b> handler</p>
+      <div id="forceMe"></div>
+      <p id="forceValue">
+        Force Level: <span id="forceValue__level">0</span>, Deep
+        Press:&nbsp;<span id="forceValue__deep_press">No</span>
+      </p>
 
-            <h1>Forceify</h1>
-            <p>Simple, yet powerful touch-<b>force</b> level detector</b></p>
-			<div id="forceMe"></div>
-			<p id="forceValue">Force Level: <span id="forceValue__level">0</span>, Deep Press:&nbsp;<span id="forceValue__deep_press">No</span></p>
-
-			<p>Grab source at <a href="https://github.com/dalisoft/Forceify" target="_blank">GitHub</a> or <a href="https://npmjs.org/package/forceify" target="_blank">NPM</a>
-				<br/>
-			Grab compiled at <a href="https://unpkg.com/forceify" target="_blank">unpkg</a>, <a href="https://npmcdn.com/forceify" target="_blank">npmcdn</a> or <a href="https://cdn.jsdelivr.net/npm/forceify" target="_blank">jsDelivr</a></p>
-
+      <p>
+        Grab source at
+        <a href="https://github.com/dalisoft/Forceify" target="_blank"
+          >GitHub</a
+        >
+        or <a href="https://npmjs.org/package/forceify" target="_blank">NPM</a>
+        <br />
+        Grab compiled at
+        <a href="https://unpkg.com/forceify" target="_blank">unpkg</a>,
+        <a href="https://npmcdn.com/forceify" target="_blank">npmcdn</a> or
+        <a href="https://cdn.jsdelivr.net/npm/forceify" target="_blank"
+          >jsDelivr</a
+        >
+      </p>
     </div>
 
     <script type="text/javascript" src="forceify.umd.js"></script>
-	<script type="text/javascript">
+    <script type="text/javascript">
+      // Helpers function
+      var forceMe = document.querySelector("#forceMe");
 
-	// Helpers function
-	var forceMe = document.querySelector('#forceMe');
+      // Lerp array (simple)
+      var steppize = function(force, args) {
+        var m = Math.round(force * (args.length - 1));
+        return args[m];
+      };
 
-	// Lerp array (simple)
-	var steppize = function (force, args) {
-	var m = Math.round(force * (args.length - 1))
-	return args[m];
-	};
+      // Returns state of deep-press (aka Force Click)
+      var isDeepPress = function(force) {
+        return force > 2 / 3;
+      };
 
-	// Returns state of deep-press (aka Force Click)
-	var isDeepPress = function (force) {
-		return force > ( 2 / 3 );
-	}
+      // Check if there CSS3 3D-mode available?
+      var is3D =
+        "perspective" in forceMe.style ||
+        "webkitPerspective" in forceMe.style ||
+        "mozPerspective" in forceMe.style ||
+        "MsPerspective" in forceMe.style ||
+        "msPerspective" in forceMe.style ||
+        "OPerspective" in forceMe.style;
 
-	// Check if there CSS3 3D-mode available?
-	var is3D = 'perspective' in forceMe.style || 'webkitPerspective' in forceMe.style || 'mozPerspective' in forceMe.style || 'MsPerspective' in forceMe.style || 'msPerspective' in forceMe.style || 'OPerspective' in forceMe.style;
+      var __webkitTransform =
+        "webkitTransform" in forceMe.style ? "webkitTransform" : "transform";
 
-	var __webkitTransform = 'webkitTransform' in forceMe.style ? 'webkitTransform' : 'transform';
+      // Setting cross-browser CSS3 Transform set helper
+      var setTransform = function(elem, transform) {
+        elem.style[__webkitTransform] = transform;
+      };
 
-	// Setting cross-browser CSS3 Transform set helper
-	var setTransform = function (elem, transform) {
-		elem.style[__webkitTransform] = transform;
-	}
+      // Node selector
+      var forceValueContainer = document.querySelector("#forceValue");
+      var forceValue = forceValueContainer.querySelector("#forceValue__level");
+      var deepState = forceValueContainer.querySelector(
+        "#forceValue__deep_press"
+      );
 
-	// Node selector
-	var forceValueContainer = document.querySelector('#forceValue');
-	var forceValue = forceValueContainer.querySelector('#forceValue__level');
-	var deepState = forceValueContainer.querySelector('#forceValue__deep_press');
+      var FONT_WEIGHT_STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
 
-	var FONT_WEIGHT_STEPS = [100, 200, 300, 400, 500, 600, 700, 800, 900];
+      // Initialize the instance
+      new Forceify(forceMe, { pressDuration: 400 }).onForce(function(ev) {
+        var force = ev.force;
+        var scale = 1 + force * 1.5;
+        var transform = "scale(" + scale + ")";
+        var borderRadius = 100 - 90 * force;
 
-	// Initialize the instance
-	new Forceify(forceMe, {pressDuration: 400}).onForce(function(ev) {
-		var force = ev.force;
-		var scale = 1 + (force * 1.5);
-		var transform = 'scale(' + scale + ')';
-		var borderRadius = 100 - (90 * force);
+        setTransform(forceMe, transform);
 
-		setTransform(forceMe, transform);
+        var color =
+          "rgb(" +
+          ((255 * force) | 0) +
+          ", " +
+          204 +
+          ", " +
+          ((255 - 255 * force) | 0) +
+          ")";
 
-		var color = 'rgb(' + ((255 * force) | 0) + ', ' + 204 + ', ' + (255 - (255 * force) | 0) + ')';
+        forceMe.style.backgroundColor = color;
+        forceMe.style.borderRadius = borderRadius + "%";
 
-		forceMe.style.backgroundColor = color;
-		forceMe.style.borderRadius = borderRadius + '%';
+        forceValue.textContent = ((force * 100) | 0) / 100;
 
-		forceValue.textContent = ((force * 100) | 0) / 100;
-
-		deepState.style.color = color;
-		deepState.style.fontWeight = steppize(force, FONT_WEIGHT_STEPS);
-		deepState.textContent = (isDeepPress(force) ? 'Yes' : 'No');
-	});
-	</script>
-	<script type="text/javascript">
-	if (!window.navigator.standalone) {
-		setTimeout(function(){
-			window.scrollTo(0, 1);
-		}, 0);
-	}
-	</script>
-</body>
+        deepState.style.color = color;
+        deepState.style.fontWeight = steppize(force, FONT_WEIGHT_STEPS);
+        deepState.textContent = isDeepPress(force) ? "Yes" : "No";
+      });
+    </script>
+    <script type="text/javascript">
+      if (!window.navigator.standalone) {
+        setTimeout(function() {
+          window.scrollTo(0, 1);
+        }, 0);
+      }
+    </script>
+  </body>
 </html>
