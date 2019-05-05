@@ -56,15 +56,7 @@ forceInstance.onForce(function(e) {
 
 ## Compatibility
 
-It's target is ES3 compatible-browsers, but it works best within following browser:
-
-| Browser    | Supported Version | Recommended Version | Best Version |
-| ---------- | ----------------- | ------------------- | ------------ |
-| IE         | >9                | >10                 | >11          |
-| Android    | >4.1.2            | >4.4                | >5.1         |
-| iOS        | >7                | >9                  | >10          |
-| macOS/OS X | >9                | >10                 | >10.12       |
-| Firefox    | >15               | > 35                | >47          |
+It's compatible with any ES6 supported browser
 
 ## License
 
