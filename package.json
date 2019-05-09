@@ -1,6 +1,6 @@
 {
   "name": "forceify",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "description": "Simple, yet powerful touch-force handler",
   "main": "forceify.umd.js",
   "browser": "forceify.umd.min.js",

@@ -1,6 +1,6 @@
 {
   "eslint.enable": false,
-  "prettier.requireConfig": true,
+  "prettier.requireConfig": false,
   "tslint.jsEnable": false,
   "tslint.exclude": "*.js",
   "javascript.format.enable": false,

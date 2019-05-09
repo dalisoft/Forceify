@@ -6,10 +6,13 @@
     module.exports = factory()
   } else if (typeof exports !== 'undefined') {
     exports.default = factory()
+    exports.__esModule = true
   } else if (typeof window !== 'undefined' && window.document) {
     window.Forceify = factory()
+    window.Forceify.__esModule = true
   } else {
     this.Forceify = factory()
+    this.Forceify.__esModule = true
   }
 })(function () {
   let tasks = []
@@ -571,6 +574,7 @@
         }
         return false
       }
+      this.on('contextmenu', e => e.preventDefault())
       this.on(_eventUp, leaveListener)
       this.on(_eventLeave, leaveListener)
       return this
