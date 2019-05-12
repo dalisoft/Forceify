@@ -2,6 +2,23 @@
 
 Simple, yet powerful touch-**force** handler
 
+## Features
+
+- Lightweight
+- Blazing fast
+- No dependecies
+- Active [tweening](https://mikebolt.github.io/discuss/examples/active_tweens.html)
+- Compatible with any mobile/desktop browser
+- Handles everything for you
+- Clean code
+- Performant
+- Easy
+- UMD compatible
+
+## Note
+
+When your device doesn't support 3D Touch/Force Touch, this library does not force your device work this feature, instead of library polyfills with `pointer` events + tweening (like Instagram post/Telegram app chat)
+
 ## Installing
 
 ```bash
@@ -23,10 +40,6 @@ https://npmcdn.com/forceify
 https://cdn.jsdelivr.net/npm/forceify
 ```
 
-## Note
-
-When device doesn't support native 3D-Touch, it's handles it via `delayed call` which works good, not implements 3D-Touch Dynamic Force level as it's impossible
-
 ## Usage
 
 It's browser-only mode, so please use it carefully and don't use with NodeJS server-side apps.
@@ -37,8 +50,9 @@ You should load script first for working snippet...
 For React apps, please use [React wrapper for Forceify](https://www.npmjs.com/package/react-forceify)
 
 ```javascript
-var forceInstance = new Forceify(yourDOMNodeReference);
-forceInstance.onForce(function(e) {
+const myElement = document.querySelector("#myElement");
+var forceTouchInstance = new Forceify(myElement);
+forceTouchInstance.onForce(e => {
   var force = e.force;
   console.log(force);
 });
