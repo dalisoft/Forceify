@@ -51,9 +51,8 @@ For React apps, please use [React wrapper for Forceify](https://www.npmjs.com/pa
 
 ```javascript
 const myElement = document.querySelector("#myElement");
-var forceTouchInstance = new Forceify(myElement);
-forceTouchInstance.onForce(e => {
-  var force = e.force;
+const forceTouchInstance = new Forceify(myElement);
+forceTouchInstance.onForce(({ force }) => {
   console.log(force);
 });
 ```
