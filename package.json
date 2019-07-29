@@ -7,8 +7,8 @@
   "cdn": "forceify.umd.min.js",
   "scripts": {
     "prepublishOnly": "npm run lint && npm run minify",
-    "lint": "npx standard --fix",
-    "minify": "npx terser forceify.umd.js -c -m -o forceify.umd.min.js"
+    "lint": "standard --fix",
+    "minify": "terser forceify.umd.js -c -m -o forceify.umd.min.js"
   },
   "standard": {
     "ignore": [
