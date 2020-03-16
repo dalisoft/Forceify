@@ -58,3 +58,6 @@ typings/
 .env
 
 forceify.umd.min.js
+
+# lockfile
+package-lock.json

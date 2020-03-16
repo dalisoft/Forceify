@@ -15,27 +15,27 @@
     this.Forceify.__esModule = true
   }
 })(function () {
-  let tasks = []
-  let id = {}
+  const tasks = []
+  const id = {}
   /* Small shim for lighter size */
-  let last = Date.now()
-  let reqAnimFrame =
+  const last = Date.now()
+  const reqAnimFrame =
     typeof requestAnimationFrame !== 'undefined'
       ? requestAnimationFrame
       : fn => setTimeout(() => fn(Date.now() - last), 50)
-  let cancelAnimFrame =
+  const cancelAnimFrame =
     typeof cancelAnimationFrame !== 'undefined'
       ? cancelAnimationFrame
       : fn => clearTimeout(fn)
   if (typeof performance === 'object' && !performance.now) {
     performance.now = () => Date.now() - last
   }
-  let now = () => {
+  const now = () => {
     return typeof performance !== 'undefined' && !!performance.now
       ? performance.now()
       : Date.now() - last
   }
-  let root =
+  const root =
     typeof global !== 'undefined'
       ? global
       : typeof window !== 'undefined'
@@ -47,7 +47,7 @@
     reqAnimFrame(update)
     let i = 0
     while (i < tasks.length) {
-      let task = tasks[i]
+      const task = tasks[i]
       if (task.update(time)) {
         i++
       } else {
@@ -79,19 +79,21 @@
       this.endValue = 1
       this.callElem = elem
     }
+
     duration (amount) {
       this._duration = amount
       return this
     }
+
     start () {
       const { _queueID, currentValue } = this
       let queue = id[_queueID]
       if (queue) {
-        let i = 0
+        const i = 0
 
         let queueItem
         while ((queueItem = queue.shift())) {
-          let idx = tasks.indexOf(queueItem)
+          const idx = tasks.indexOf(queueItem)
           if (idx > -1) {
             tasks.splice(i, 1)
           }
@@ -106,17 +108,20 @@
       this._startTime = now() + this._delayTime
       return this
     }
+
     delay (amount) {
       this._delayTime = amount
       return this
     }
+
     onUpdate (callback) {
       this._onUpdate = callback
       return this
     }
+
     restart (asReverse) {
-      let { _delayTime, currentValue } = this
-      let i = tasks.indexOf(this)
+      const { _delayTime, currentValue } = this
+      const i = tasks.indexOf(this)
       if (i === -1) {
         this.start()
       } else {
@@ -128,8 +133,9 @@
       }
       return this
     }
+
     update (time) {
-      let {
+      const {
         _startTime,
         _duration,
         _onUpdate,
@@ -159,7 +165,7 @@
       return true
     }
   }
-  let navig =
+  const navig =
     typeof navigator !== 'undefined'
       ? navigator
       : {
@@ -167,11 +173,11 @@
         maxTouchPoints: 0,
         msMaxTouchPoints: 0
       }
-  let ua = navig.userAgent
-  let _isIOSDevices =
+  const ua = navig.userAgent
+  const _isIOSDevices =
     ua.indexOf('; CPU') !== -1 && ua.indexOf(' like Mac') !== -1
-  let _document = !root.document ? {} : root.document
-  let _isTouchSimulate =
+  const _document = !root.document ? {} : root.document
+  const _isTouchSimulate =
     (_document.body && 'ontouchend' in _document.body) ||
     root.DocumentTouch ||
     navig.maxTouchPoints > 0 ||
@@ -179,7 +185,7 @@
   let _isReal3DTouch =
     _document.body && 'ontouchforcechange' in _document.body && _isIOSDevices
   function getTouch (e, targ, changed) {
-    let touches = changed ? e.touches : e.changedTouches
+    const touches = changed ? e.touches : e.changedTouches
     if (touches) {
       let i = 0
       const maxLen = touches.length
@@ -232,47 +238,57 @@
       this.tick = null
       return this
     }
+
     getEnv () {
       return this._checkResult
     }
+
     resetOnLeave (state = true) {
       this._resetOnLeave = state
       return this
     }
+
     useLongPressEqualDuration (state = true) {
       this._useSameDurInLeave = state
       return this
     }
+
     setLongPressLeaveTolerance (amount) {
       this._leaveDurationTolerance = amount
       this._leaveDuration = this._pressDuration * amount
       return this
     }
+
     setLongPressDelay (amount) {
       this._delay = amount
       return this
     }
+
     setLongPressDuration (amount) {
       this._pressDuration = amount
       this._leaveDuration = amount * this._leaveDurationTolerance
       return this
     }
+
     onForce (fn) {
       this._callback = fn
       return this.init()
     }
+
     on (eventName, callbackListener, capture) {
       if (root.addEventListener) {
         this.el.addEventListener(eventName, callbackListener, capture)
       }
       return this
     }
+
     off (eventName, callbackListener, capture) {
       if (root.removeEventListener) {
         this.el.removeEventListener(eventName, callbackListener, capture)
       }
       return this
     }
+
     preventTouchCallout () {
       const el = this.el
       const touchCallout = [
@@ -289,7 +305,7 @@
         'msUserDrag',
         'userDrag'
       ]
-      for (let property of touchCallout) {
+      for (const property of touchCallout) {
         if (property in el.style) {
           el.style[property] = 'none'
         }
@@ -300,13 +316,14 @@
         'msTouchAction',
         'touchAction'
       ]
-      for (let property of touchActions) {
+      for (const property of touchActions) {
         if (property in el.style) {
           el.style[property] = 'manipulation'
         }
       }
       return this
     }
+
     handleForceChange (e) {
       if (e.preventDefault) {
         e.preventDefault()
@@ -331,7 +348,7 @@
       }
 
       if (force === undefined) {
-        let touches = getTouch(e, this.el, true)
+        const touches = getTouch(e, this.el, true)
         if (!touches) {
           force = 0
         } else {
@@ -359,6 +376,7 @@
       this._callback.call(this, e); // eslint-disable-line
       return false
     }
+
     init () {
       const { el, polyfill } = this
       const isPointerSupported = 'onpointerdown' in el
@@ -373,7 +391,7 @@
 
       const renderUntilBecomeZero = time => {
         const { __force } = this
-        let force =
+        const force =
           (1 - Math.min((time - perfNow) / this._leaveDuration, 1)) * __force
         if (force > 0) {
           tickForce = reqAnimFrame(renderUntilBecomeZero)
@@ -423,7 +441,7 @@
         this._checkResult = 'macOSForce'
         return this
       } else if (_isReal3DTouch) {
-        let verify3DTouch = () => {
+        const verify3DTouch = () => {
           if (this.nativeAPIExists) {
             this.off('touchstart', verify3DTouch)
           } else {
@@ -485,8 +503,9 @@
       this.isPressed = false
       return this.handleSimulate()
     }
+
     handleLeave () {
-      let {
+      const {
         _simulatedCallback,
         _useSameDurInLeave,
         _pressDuration,
@@ -500,8 +519,9 @@
       }
       return this
     }
+
     handlePress () {
-      let {
+      const {
         _simulatedCallback,
         _pressDuration,
         _delay,
@@ -515,6 +535,7 @@
       }
       return this
     }
+
     handleSimulate () {
       let {
         _simulatedCallback,
@@ -587,20 +608,25 @@
       this.on(_eventLeave, leaveListener)
       return this
     }
+
     isChrome () {
       return (
         this._checkResult === 'Chrome' || this._checkResult === 'ChromeMobile'
       )
     }
+
     isMacOSForceTouch () {
       return this._checkResult === 'macOSForce'
     }
+
     isIOS3DTouch () {
       return this._checkResult === 'iOSForce'
     }
+
     isTouch () {
       return this._checkResult === 'Touch'
     }
+
     isMouse () {
       return this._checkResult === 'Desktop'
     }
